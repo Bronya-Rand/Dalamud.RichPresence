@@ -1,25 +1,22 @@
-using System;
-using Dalamud.Plugin.Ipc;
+﻿using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Ipc.Exceptions;
+using System;
 
-namespace Dalamud.RichPresence.Managers
+namespace Dalamud.RichPresence.Services
 {
-    internal class IpcManager : IDisposable
+    internal class IPCService : IDisposable
     {
         // Waitingway IPCs
         private readonly ICallGateSubscriber<int?> wwQueueType;
         private readonly ICallGateSubscriber<int?> wwCurrentPosition;
-        // private readonly ICallGateSubscriber<TimeSpan?> wwElapsedTime;
         private readonly ICallGateSubscriber<TimeSpan?> wwEstimatedTimeRemaining;
 
-        public IpcManager()
+        public IPCService()
         {
-            wwQueueType = RichPresencePlugin.DalamudPluginInterface.GetIpcSubscriber<int?>("Waitingway.QueueType");
-            wwCurrentPosition = RichPresencePlugin.DalamudPluginInterface.GetIpcSubscriber<int?>("Waitingway.CurrentPosition");
-            //wwElapsedTime =
-            //    RichPresencePlugin.DalamudPluginInterface.GetIpcSubscriber<TimeSpan?>("Waitingway.ElapsedTime");
+            wwQueueType = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.QueueType");
+            wwCurrentPosition = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.CurrentPosition");
             wwEstimatedTimeRemaining =
-                RichPresencePlugin.DalamudPluginInterface.GetIpcSubscriber<TimeSpan?>("Waitingway.EstimatedTimeRemaining");
+                Plugin.PluginInterface.GetIpcSubscriber<TimeSpan?>("Waitingway.EstimatedTimeRemaining");
         }
 
         public bool IsInLoginQueue()
@@ -34,7 +31,6 @@ namespace Dalamud.RichPresence.Managers
                 return false;
             }
         }
-
         public int GetQueuePosition()
         {
             try
@@ -46,7 +42,6 @@ namespace Dalamud.RichPresence.Managers
                 return -1;
             }
         }
-
         public TimeSpan? GetQueueEstimate()
         {
             try
@@ -58,9 +53,6 @@ namespace Dalamud.RichPresence.Managers
                 return null;
             }
         }
-
-        public void Dispose()
-        {
-        }
+        public void Dispose() => GC.SuppressFinalize(this);
     }
 }

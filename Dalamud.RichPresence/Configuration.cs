@@ -1,8 +1,8 @@
 ﻿using Dalamud.Configuration;
 
-namespace Dalamud.RichPresence.Configuration
+namespace Dalamud.RichPresence
 {
-    class RichPresenceConfig : IPluginConfiguration
+    class Configuration : IPluginConfiguration
     {
         public int Version { get; set; } = 1;
 

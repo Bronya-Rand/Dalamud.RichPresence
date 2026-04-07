@@ -1,10 +1,10 @@
 {
-  "Author": "goat, maintained by Franz",
+  "Author": "Bronya Rand (formerly Franz, goat)",
   "Name": "Discord Rich Presence",
-  "Description": "This plugin allows you to show your zone, job, level, name, and world in your Discord status.",
+  "Description": "Show your zone, job, level, name, and world in your Discord status.",
   "Punchline": "Show your zone, job, level, name, and world in your Discord status",
   "InternalName": "Dalamud.RichPresence",
-  "RepoUrl": "https://github.com/reiichi001/Dalamud.RichPresence",
+  "RepoUrl": "https://github.com/Bronya-Rand/Dalamud.RichPresence",
   "Tags": [
     "Discord"
   ],

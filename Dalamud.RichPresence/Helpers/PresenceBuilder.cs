@@ -39,8 +39,11 @@ namespace Dalamud.RichPresence.Helpers
 #endif
 
                 if (configuration.ShowFreeCompany && player.IsOnHomeWorld && !string.IsNullOrEmpty(player.FcTag))
+#if DEBUG
+                    details = $"{details} \u00abFC\u00bb";
+#else
                     details = $"{details} \u00ab{player.FcTag}\u00bb";
-
+#endif
                 if (configuration.ShowWorld && !player.IsOnHomeWorld)
                     details = $"{details} \u2740 {player.HomeWorld}";
                 else if (configuration.AlwaysShowHomeWorld)
@@ -61,7 +64,7 @@ namespace Dalamud.RichPresence.Helpers
                     state = $"{state} (Test Data Center)";
 #else
                 state = player.CurrentWorld;
-                if (config.ShowDataCenter)
+                if (configuration.ShowDataCenter)
                     state = $"{state} ({player.DataCenterName})";
 #endif
             }

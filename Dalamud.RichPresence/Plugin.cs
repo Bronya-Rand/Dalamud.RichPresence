@@ -114,7 +114,7 @@ namespace Dalamud.RichPresence
             SetDefaultPresence();
             UpdateStartTime();
         }
-        private void OnZoneChange(ushort _) => UpdateStartTime();
+        private void OnZoneChange(uint _) => UpdateStartTime();
 
         #endregion
         public void ToggleConfigUi() => ConfigWindow.Toggle();

@@ -1,7 +1,6 @@
-using System;
 using System.IO;
-using System.Text.Json;
 using Dalamud.Configuration;
+using Newtonsoft.Json;
 
 namespace Dalamud.RichPresence;
 
@@ -33,23 +32,49 @@ internal sealed class LegacyConfigurationV1 : IPluginConfiguration
 
 public static class Migrate
 {
-    public static Configuration? TryMigrateFromLegacyConfig()
+    public static Configuration? TryMigrateFromLegacyConfig(IPluginConfiguration? pluginConfiguration)
     {
-        string configPath = Path.Combine(Plugin.PluginInterface.ConfigDirectory.FullName, "Dalamud.RichPresence.json");
-        if (!File.Exists(configPath)) return null;
-        
-        var json = File.ReadAllText(configPath);
-        LegacyConfigurationV1? oldCfg;
-        try
+        // If there's no existing config, nothing to migrate.
+        if (pluginConfiguration == null)
+            return null;
+
+        // If it's already V2+, no migration needed.
+        if (pluginConfiguration.Version >= 2)
         {
-            oldCfg = JsonSerializer.Deserialize<LegacyConfigurationV1>(json);
+            Plugin.Log.Debug("Config is already V2+, no migration needed.");
+            return pluginConfiguration as Configuration;
         }
-        catch
+
+        // V1 Config
+        Plugin.Log.Info("Detected V1 config. Attempting migration to V2.");
+
+        var configPath = Plugin.PluginInterface.ConfigFile.FullName;
+        if (!File.Exists(configPath))
         {
+            Plugin.Log.Warning("Config file not found on disk for migration. Using defaults.");
             return null;
         }
 
-        return oldCfg == null ? null : MigrateV1ToV2(oldCfg);
+        try
+        {
+            var json = File.ReadAllText(configPath);
+            var oldCfg = JsonConvert.DeserializeObject<LegacyConfigurationV1>(json);
+            if (oldCfg == null)
+            {
+                Plugin.Log.Warning("Failed to deserialize V1 config. Using defaults.");
+                return null;
+            }
+
+            var newCfg = MigrateV1ToV2(oldCfg);
+            newCfg.Save();
+            Plugin.Log.Info("Successfully migrated V1 config to V2.");
+            return newCfg;
+        }
+        catch (System.Exception ex)
+        {
+            Plugin.Log.Error(ex, "Error during V1 -> V2 config migration. Using defaults.");
+            return null;
+        }
     }
 
     private static Configuration MigrateV1ToV2(LegacyConfigurationV1 oldCfg)

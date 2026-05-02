@@ -90,6 +90,15 @@ namespace Dalamud.RichPresence.Windows
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Displays your current job class icon instead of the online status icon for the small image in Discord RPC.");
 
+            var shortenJobName = configuration.AbbreviateJob;
+            if (ImGui.Checkbox("Abbreviate Job Name", ref shortenJobName))
+            {
+                configuration.AbbreviateJob = shortenJobName;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Shortens the Job Name from 'Summoner' to 'SMN'.");
+
             var showPartyData = configuration.ShowPartyData;
             if (ImGui.Checkbox("Display Party Information", ref showPartyData))
             {
@@ -98,6 +107,24 @@ namespace Dalamud.RichPresence.Windows
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Displays how many people are in your party in Discord RPC (e.g. 7 of 8 players).");
+
+            var showTimestamps = configuration.DisplayDiscordTimestamp;
+            if (ImGui.Checkbox("Display Timestamps", ref showTimestamps))
+            {
+                configuration.DisplayDiscordTimestamp = showTimestamps;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Displays the time you have been in a region/on XIV.");
+
+            var showQueue = configuration.ShowLoginQueuePosition;
+            if (ImGui.Checkbox("Display Queue Times [Waitingway]", ref showQueue))
+            {
+                configuration.ShowLoginQueuePosition = showQueue;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Displays the queue time when logging in (requires Waitingway).");
             
             var showAfkStatus = configuration.ShowAfk;
             if (ImGui.Checkbox("Display AFK Status", ref showAfkStatus))

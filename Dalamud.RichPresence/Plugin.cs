@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.Command;
+using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -57,8 +57,8 @@ namespace Dalamud.RichPresence;
         public Plugin()
         {
             // Load / create config
-            Migrate.TryMigrateFromLegacyConfig();
-            Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+            var config = PluginInterface.GetPluginConfig();
+            Configuration = Migrate.TryMigrateFromLegacyConfig(config) ?? new Configuration();
 
             // Initialize services and managers
             LuminaService = new LuminaService(DataManager);

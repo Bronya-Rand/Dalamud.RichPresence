@@ -81,6 +81,15 @@ namespace Dalamud.RichPresence.Windows
             ImGui.Text("Rich Presence Conditions");
             ImGui.Spacing();
             
+            var showJobIcon = configuration.ShowJobIcon;
+            if (ImGui.Checkbox("Display Job Icon for Small Image", ref showJobIcon))
+            {
+                configuration.ShowJobIcon = showJobIcon;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Displays your current job class icon instead of the online status icon for the small image in Discord RPC.");
+
             var showPartyData = configuration.ShowPartyData;
             if (ImGui.Checkbox("Display Party Information", ref showPartyData))
             {

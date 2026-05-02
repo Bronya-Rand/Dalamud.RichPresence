@@ -42,7 +42,9 @@ namespace Dalamud.RichPresence.Helpers
             var largeImageText = ParserService.Parse(configuration.DiscordLargeImageTextField, player, party, status, 
                 configuration);
 
-            var smallImageKey = DefaultSmallImageKey;
+            var smallImageKey = configuration.ShowJobIcon 
+                ? $"class_{player.ClassJobId}" 
+                : DefaultSmallImageKey;
             var smallImageText = ParserService.Parse(configuration.DiscordSmallImageTextField, player, party, status, 
                 configuration);
 

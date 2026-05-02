@@ -15,15 +15,12 @@ public class Configuration : IPluginConfiguration
     public int Version { get; set; } = 2;
 
     /// <summary>
-    /// The template string to use for displaying in Discord RPC.
+    /// The template strings to use for displaying in Discord RPC.
     /// </summary>
     public string DiscordDetailField = "";
-
     public string DiscordStateField = "";
-
     public string DiscordSmallImageTextField = "";
     public string DiscordLargeImageTextField = "";
-
     public bool DisplayDiscordTimestamp = true;
     
     /// <summary>
@@ -40,6 +37,11 @@ public class Configuration : IPluginConfiguration
     /// Whether to use "RDM" over "Red Mage"
     /// </summary>
     public bool AbbreviateJob = true;
+
+    /// <summary>
+    /// Determines whether to use the job icon for the small image instead of the online status.
+    /// </summary>
+    public bool ShowJobIcon = true;
     
     /// <summary>
     /// Whether to show party information in RPC

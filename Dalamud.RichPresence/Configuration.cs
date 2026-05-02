@@ -17,10 +17,10 @@ public class Configuration : IPluginConfiguration
     /// <summary>
     /// The template strings to use for displaying in Discord RPC.
     /// </summary>
-    public string DiscordDetailField = "";
-    public string DiscordStateField = "";
-    public string DiscordSmallImageTextField = "";
-    public string DiscordLargeImageTextField = "";
+    public string DiscordDetailField = "{playername} {fc}";
+    public string DiscordStateField = "{world}";
+    public string DiscordSmallImageTextField = "{location}";
+    public string DiscordLargeImageTextField = "{job} Lv. {level}";
     public bool DisplayDiscordTimestamp = true;
     
     /// <summary>

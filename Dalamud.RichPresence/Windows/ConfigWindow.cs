@@ -26,7 +26,7 @@ namespace Dalamud.RichPresence.Windows
                     | ImGuiWindowFlags.AlwaysAutoResize 
                     | ImGuiWindowFlags.HorizontalScrollbar;
 
-            Size = new Vector2(500, 375);
+            Size = new Vector2(500, 475);
             SizeCondition = ImGuiCond.Always;
             
             configuration = plugin.Configuration;

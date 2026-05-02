@@ -8,26 +8,26 @@ internal sealed class LegacyConfigurationV1 : IPluginConfiguration
 {
     public int Version { get; set; } = 1;
 
-    public bool ShowLoginQueuePosition = true;
-    public bool ShowName = true;
-    public bool ShowFreeCompany = true;
-    public bool ShowWorld = true;
-    public bool AlwaysShowHomeWorld = false;
-    public bool ShowDataCenter = false;
+    public readonly bool ShowLoginQueuePosition = true;
+    public readonly bool ShowName = true;
+    public readonly bool ShowFreeCompany = true;
+    public readonly bool ShowWorld = true;
+    public readonly bool AlwaysShowHomeWorld = false;
+    public readonly bool ShowDataCenter = false;
 
-    public bool ShowStartTime = false;
-    public bool ResetTimeWhenChangingZones = true;
+    public readonly bool ShowStartTime = false;
+    public readonly bool ResetTimeWhenChangingZones = true;
 
-    public bool ShowJob = true;
-    public bool AbbreviateJob = true;
-    public bool ShowLevel = true;
+    public readonly bool ShowJob = true;
+    public readonly bool AbbreviateJob = true;
+    public readonly bool ShowLevel = true;
 
-    public bool ShowParty = true;
+    public readonly bool ShowParty = true;
 
-    public bool ShowAfk = true;
-    public bool HideEntirelyWhenAfk = false;
-    public bool HideInCutscene = false;
-    public bool RPCBridgeEnabled = true;
+    public readonly bool ShowAfk = true;
+    public readonly bool HideEntirelyWhenAfk = false;
+    public readonly bool HideInCutscene = false;
+    public readonly bool RPCBridgeEnabled = true;
 }
 
 public static class Migrate

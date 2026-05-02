@@ -1,4 +1,4 @@
-﻿using Dalamud.Game;
+using Dalamud.Game;
 using Dalamud.RichPresence.Models;
 using Dalamud.Utility;
 using Newtonsoft.Json;
@@ -16,7 +16,7 @@ namespace Dalamud.RichPresence.Services
 
         private static readonly HashSet<string> SupportedLangCodes = new(StringComparer.OrdinalIgnoreCase)
         {
-            "en", "de", "fr", "ja"
+            "en", "de", "fr", "ja", "zh", "ur", "tw", "si", "ru", "pt", "no", "ko", "it", "es"
         };
 
         private CultureInfo clientCultureInfo = CultureInfo.GetCultureInfo(DefaultLangCode);
@@ -118,20 +118,21 @@ namespace Dalamud.RichPresence.Services
                 message = entry.Message;
                 return true;
             }
-
+            Plugin.Log.Debug("Failed to find localization message for key: " + key);
             message = string.Empty;
             return false;
         }
         public string Localize(string localizationStringKey, LocalizationLanguage localizationSource)
         {
-            if (!localizationStringKey.IsNullOrWhitespace()) return string.Empty;
+            if (localizationStringKey.IsNullOrWhitespace()) return string.Empty;
             if (localizationSource == LocalizationLanguage.Client)
                 RefreshClientLanguageIfChanged();
 
             var sourceDict = localizationSource == LocalizationLanguage.Client
                 ? clientLocalizationDictionary
                 : pluginLocalizationDictionary;
-
+            
+            Plugin.Log.Debug("All passed");
             if (TryGetMessage(sourceDict, localizationStringKey, out var message))
                 return message;
 

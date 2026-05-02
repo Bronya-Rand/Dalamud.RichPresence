@@ -70,8 +70,8 @@ public static partial class ParserService
 #else
             "playername" => player.PlayerName,
             "world" => player.CurrentWorld,
-            "dc" => party.DataCenterName,
-            "job" => config.AbbreviateJob ? "BLM" : "Black Mage",
+            "dc" => player.DataCenterName,
+            "job" => config.AbbreviateJob ? player.ClassJobAbbreviation : player.ClassJob,
             "level" => player.Level > 0 ? player.Level.ToString() : string.Empty,
             "content" => party.InDuty ? player.TerritoryName : string.Empty,
             "location" => player.TerritoryName,

@@ -1,41 +1,72 @@
-﻿using Dalamud.Configuration;
+﻿using System;
+using Dalamud.Configuration;
 
-namespace Dalamud.RichPresence
+namespace Dalamud.RichPresence;
+
+/// <summary>
+/// Discord RPC Configuration Settings
+/// </summary>
+[Serializable]
+public class Configuration : IPluginConfiguration
 {
-    class Configuration : IPluginConfiguration
+    /// <summary>
+    /// Schema version of the configuration.
+    /// </summary>
+    public int Version { get; set; } = 2;
+
+    /// <summary>
+    /// The template string to use for displaying in Discord RPC.
+    /// </summary>
+    public string DiscordDetailField = "";
+
+    public string DiscordStateField = "";
+
+    public string DiscordSmallImageTextField = "";
+    public string DiscordLargeImageTextField = "";
+
+    public bool DisplayDiscordTimestamp = true;
+    
+    /// <summary>
+    /// Shows the queue you are on the Login Screen (uses Waitingway)
+    /// </summary>
+    public bool ShowLoginQueuePosition = true;
+    
+    /// <summary>
+    /// Determines whether to reset the RPC timer when moving zones
+    /// </summary>
+    public bool ResetTimeWhenChangingZones = true;
+    
+    /// <summary>
+    /// Whether to use "RDM" over "Red Mage"
+    /// </summary>
+    public bool AbbreviateJob = true;
+    
+    /// <summary>
+    /// Whether to show party information in RPC
+    /// </summary>
+    public bool ShowPartyData = true;
+    
+    /// <summary>
+    /// Whether to show AFK status in RPC
+    /// </summary>
+    public bool ShowAfk = true;
+    
+    /// <summary>
+    /// Determines whether to hide info whilst AFK.
+    /// </summary>
+    public bool HideEntirelyWhenAfk = false;
+    
+    /// <summary>
+    /// Determines whether to hide info whilst in a cutscene.
+    /// </summary>
+    public bool HideInCutscene = false;
+    
+    /// <summary>
+    /// Determines whether to enable the Wine RPC bridge (for Linux users).
+    /// </summary>
+    public bool RPCBridgeEnabled = true;
+    public void Save()
     {
-        public int Version { get; set; } = 1;
-
-        // Show login queue position
-        public bool ShowLoginQueuePosition = true;
-        // Show character name
-        public bool ShowName = true;
-        // Show Free Company Tag
-        public bool ShowFreeCompany = true;
-        // Show world name
-        public bool ShowWorld = true;
-        // Always show home world in details (even when on home world)
-        public bool AlwaysShowHomeWorld = false;
-        // show data center name alongside world
-        public bool ShowDataCenter = false;
-
-        // Show elapsed time in zones
-        public bool ShowStartTime = false;
-        // Reset timer when changing zones
-        public bool ResetTimeWhenChangingZones = true;
-
-        // Show current job
-        public bool ShowJob = true;
-        // Abbreviate current job name
-        public bool AbbreviateJob = true;
-        // Show current job level
-        public bool ShowLevel = true;
-
-        public bool ShowParty = true;
-
-        public bool ShowAfk = true;
-        public bool HideEntirelyWhenAfk = false;
-        public bool HideInCutscene = false;
-        public bool RPCBridgeEnabled = true;
+        Plugin.PluginInterface.SavePluginConfig(this);
     }
 }

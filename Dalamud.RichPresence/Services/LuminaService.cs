@@ -9,14 +9,14 @@ namespace Dalamud.RichPresence.Services
     internal class LuminaService : IDisposable
     {
         public static LuminaService Instance { get; private set; } = null!;
-        public IDataManager DataManager { get; private set; } = null!;
+        private IDataManager DataManager { get; set;  }
 
-        public readonly ExcelSheet<World> Worlds;
-        public readonly ExcelSheet<TerritoryType> TerritoryTypes;
+        private readonly ExcelSheet<World> Worlds;
+        private readonly ExcelSheet<TerritoryType> TerritoryTypes;
         public readonly ExcelSheet<PlaceName> PlaceNames;
         public readonly ExcelSheet<ClassJob> ClassJobs;
-        public readonly ExcelSheet<OnlineStatus> OnlineStatus;
-        public readonly ExcelSheet<ContentFinderCondition> ContentFinderConditions;
+        private readonly ExcelSheet<OnlineStatus> OnlineStatus;
+        private readonly ExcelSheet<ContentFinderCondition> ContentFinderConditions;
 
         public LuminaService(IDataManager dataManager)
         {
@@ -31,12 +31,8 @@ namespace Dalamud.RichPresence.Services
             OnlineStatus = DataManager.GetExcelSheet<OnlineStatus>()!;
             ContentFinderConditions = DataManager.GetExcelSheet<ContentFinderCondition>()!;
         }
-        public string GetWorldName(uint worldId)
-        {
-            if (Worlds.TryGetRow(worldId, out var row))
-                return row.Name.ExtractText();
-            return $"Unknown World ({worldId})";
-        }
+        public string GetWorldName(uint worldId) => 
+            Worlds.TryGetRow(worldId, out var row) ? row.Name.ExtractText() : $"Unknown World ({worldId})";
         public string GetTerritoryName(uint territoryId)
         {
             if (TerritoryTypes.TryGetRow(territoryId, out var row))
@@ -57,21 +53,11 @@ namespace Dalamud.RichPresence.Services
                 return row;
             return null;
         }
-        public uint GetOriginalTerritoryId(uint territoryId)
-        {
-            return TerritoryTypes.GetRow(territoryId).RowId;
-        }
-        public string GetOnlineStatusName(uint statusId)
-        {
-            if (OnlineStatus.TryGetRow(statusId, out var row))
-                return row.Name.ExtractText();
-            return $"Unknown Status ({statusId})";
-        }
-        public ContentFinderCondition? GetContentFinderConditionOfClient()
-        {
-            return ContentFinderConditions.FirstOrNull(c => c.TerritoryType.RowId == Plugin.ClientState.TerritoryType);
-        }
-
+        public uint GetOriginalTerritoryId(uint territoryId) => TerritoryTypes.GetRow(territoryId).RowId;
+        public string GetOnlineStatusName(uint statusId) => OnlineStatus.TryGetRow(statusId, out var row)
+            ? row.Name.ExtractText()
+            : $"Unknown Status ({statusId})";
+        public ContentFinderCondition? GetContentFinderConditionOfClient() => ContentFinderConditions.FirstOrNull(c => c.TerritoryType.RowId == Plugin.ClientState.TerritoryType);
         public void Dispose()
         {
             GC.SuppressFinalize(this);

@@ -10,9 +10,9 @@ using Dalamud.RichPresence.Windows;
 using DiscordRPC;
 using System;
 
-namespace Dalamud.RichPresence
-{
-    internal class Plugin : IDalamudPlugin, IDisposable
+namespace Dalamud.RichPresence;
+
+    public sealed class Plugin : IDalamudPlugin, IDisposable
     {
         #region Dalamud Services
         [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
@@ -131,14 +131,14 @@ namespace Dalamud.RichPresence
             if (Configuration.ResetTimeWhenChangingZones)
                 startTime = DateTime.UtcNow;
 
-            if (Configuration.ShowStartTime)
+            if (Configuration.DisplayDiscordTimestamp)
                 DiscordService.UpdatePresenceStartTime(startTime);
         }
         private void UpdatePresence(IFramework framework)
         {
             try
             {
-                var timestamp = Configuration.ShowStartTime ? new Timestamps(startTime) : null;
+                var timestamp = Configuration.DisplayDiscordTimestamp ? new Timestamps(startTime) : null;
                 var context = new CollectContext(Configuration);
 
                 if (ObjectTable.LocalPlayer == null)
@@ -173,7 +173,7 @@ namespace Dalamud.RichPresence
                 }
 
                 var presence = PresenceBuilder.Build(
-                    context.GetPlayerStatus(),
+                    CollectContext.GetPlayerStatus(),
                     context.GetPartyStatus(),
                     CollectContext.OnlineStatus,
                     timestamp,
@@ -214,4 +214,4 @@ namespace Dalamud.RichPresence
             DiscordService.Dispose();
         }
     }
-}
+

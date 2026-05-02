@@ -10,9 +10,44 @@ using System.Text;
 namespace Dalamud.RichPresence.Helpers
 {
     internal readonly record struct QueueContext(bool IsInQueue, int Position, TimeSpan? Estimate);
-    internal readonly record struct OnlineStatusContext(bool IsAFK, bool WatchingCutscene, string StatusName);
-    internal readonly record struct PartyContext(bool InParty, bool InDuty, bool IsPartyCrossRealm, int PartySize, int PartyMaxSize, string HashedPartyId);
-    internal readonly record struct PlayerContext(
+    /// <summary>
+    /// A record containing a player's online status info
+    /// </summary>
+    /// <param name="IsAfk">Whether the player is AFK/Idle</param>
+    /// <param name="WatchingCutscene">Whether the player is watching a cutscene</param>
+    /// <param name="StatusName">The status the player has at the moment</param>
+    public readonly record struct OnlineStatusContext(bool IsAfk, bool WatchingCutscene, string StatusName);
+    
+    /// <summary>
+    /// A record containing a player's party info
+    /// </summary>
+    /// <param name="InParty">Whether the player is in a party</param>
+    /// <param name="InDuty">Whether the player is in a duty</param>
+    /// <param name="IsPartyCrossRealm">Whether the player is in a cross-realm party</param>
+    /// <param name="PartySize">The current party size</param>
+    /// <param name="PartyMaxSize">The max players the party can hold</param>
+    /// <param name="HashedPartyId">An SHA-256 ID of the party</param>
+    public readonly record struct PartyContext(bool InParty, bool InDuty, bool IsPartyCrossRealm, int PartySize, int PartyMaxSize, string HashedPartyId);
+    
+    /// <summary>
+    /// A record containing a player's info
+    /// </summary>
+    /// <param name="PlayerName">The name of the player</param>
+    /// <param name="FcTag">The Free Company the player is in</param>
+    /// <param name="CurrentWorldId">The ID current world the player is in</param>
+    /// <param name="CurrentWorld">The string name of the world the player is in</param>
+    /// <param name="HomeWorldId">The ID of the player's home world</param>
+    /// <param name="HomeWorld">The string name of the player's home world</param>
+    /// <param name="IsOnHomeWorld">Whether the player is in their homeworld</param>
+    /// <param name="DataCenterName">The name of the data center the player is in</param>
+    /// <param name="TerritoryName">The name of the territory the player is in</param>
+    /// <param name="TerritoryRegion">The region the territory the player is in resides</param>
+    /// <param name="TerritoryLoadingImageId">The loading ID image of the region used for large images</param>
+    /// <param name="ClassJobId">The ID of the player's current class</param>
+    /// <param name="ClassJob">The string of the player's current class</param>
+    /// <param name="ClassJobAbbreviation">The 3 letter abbreviation of the player's current class</param>
+    /// <param name="Level">The player's level</param>
+    public readonly record struct PlayerContext(
         string PlayerName, string FcTag,
         uint CurrentWorldId, string CurrentWorld,
         uint HomeWorldId, string HomeWorld,
@@ -53,7 +88,7 @@ namespace Dalamud.RichPresence.Helpers
                 var onlineStatusStr = LuminaService.Instance.GetOnlineStatusName(onlineStatusRowId);
 
                 return new OnlineStatusContext(
-                    IsAFK: onlineStatusRowId == 17, // Row 17 has the AFK icon status
+                    IsAfk: onlineStatusRowId == 17, // Row 17 has the AFK icon status
                     WatchingCutscene: watchingCutscene,
                     StatusName: onlineStatusStr
                 );
@@ -62,12 +97,12 @@ namespace Dalamud.RichPresence.Helpers
 
         public unsafe PartyContext GetPartyStatus()
         {
-            if (!configuration.ShowParty) return new PartyContext(false, false, false, -1, -1, string.Empty);
+            if (!configuration.ShowPartyData) return new PartyContext(false, false, false, -1, -1, string.Empty);
             if (Plugin.PartyList.Length > 0 && Plugin.PartyList.PartyId != 0)
             {
                 var contentFinderConditionTerritory = LuminaService.Instance.GetContentFinderConditionOfClient();
 
-                var maxPartySize = contentFinderConditionTerritory != null && contentFinderConditionTerritory.Value.ContentType.RowId == 2 ? 4 : 8;
+                var maxPartySize = contentFinderConditionTerritory is { ContentType.RowId: 2 } ? 4 : 8;
                 if (Plugin.PartyList.Length > maxPartySize)
                     maxPartySize = Plugin.PartyList.Length;
 
@@ -77,47 +112,43 @@ namespace Dalamud.RichPresence.Helpers
                     IsPartyCrossRealm: false,
                     PartySize: Plugin.PartyList.Length,
                     PartyMaxSize: maxPartySize,
-                    HashedPartyId: GetStringSHA256Hash(Plugin.PartyList.PartyId.ToString())
+                    HashedPartyId: GetStringSha256Hash(Plugin.PartyList.PartyId.ToString())
                 );
             }
             else
             {
                 var infoProxyCrossRealm = InfoProxyCrossRealm.Instance();
-                if (infoProxyCrossRealm == null) return new PartyContext(false, false, false, -1, -1, string.Empty);
+                if (infoProxyCrossRealm == null || !infoProxyCrossRealm->IsInCrossRealmParty) return new PartyContext(false, false, false, -1, -1, string.Empty);
 
-                if (infoProxyCrossRealm->IsInCrossRealmParty)
+                var partySize = InfoProxyCrossRealm.GetGroupMemberCount(infoProxyCrossRealm->LocalPlayerGroupIndex);
+
+                if (partySize <= 0) 
+                    return new PartyContext(false, false, false, -1, -1, string.Empty);
+                    
+                var memberArray = new CrossRealmMember[partySize];
+                for (var i = 0u; i < partySize; i++)
                 {
-                    var partySize = InfoProxyCrossRealm.GetGroupMemberCount(infoProxyCrossRealm->LocalPlayerGroupIndex);
-
-                    if (partySize > 0)
-                    {
-                        var memberArray = new CrossRealmMember[partySize];
-                        for (var i = 0u; i < partySize; i++)
-                        {
-                            memberArray[i] = *InfoProxyCrossRealm.GetGroupMember(i, infoProxyCrossRealm->LocalPlayerGroupIndex);
-                        }
-                        var lowestContentId = memberArray.OrderBy(m => m.ContentId).Select(m => m.ContentId).First();
-
-                        return new PartyContext(
-                            InParty: true,
-                            InDuty: false,
-                            IsPartyCrossRealm: true,
-                            PartySize: partySize,
-                            PartyMaxSize: 8,
-                            HashedPartyId: GetStringSHA256Hash(lowestContentId.ToString())
-                        );
-                    }
+                    memberArray[i] = *InfoProxyCrossRealm.GetGroupMember(i, infoProxyCrossRealm->LocalPlayerGroupIndex);
                 }
+                var lowestContentId = memberArray.OrderBy(m => m.ContentId).Select(m => m.ContentId).First();
+
+                return new PartyContext(
+                    InParty: true,
+                    InDuty: false,
+                    IsPartyCrossRealm: true,
+                    PartySize: partySize,
+                    PartyMaxSize: 8,
+                    HashedPartyId: GetStringSha256Hash(lowestContentId.ToString())
+                );
             }
-            return new PartyContext(false, false, false, -1, -1, string.Empty);
         }
-        public unsafe PlayerContext GetPlayerStatus()
+        public static unsafe PlayerContext GetPlayerStatus()
         {
             if (Plugin.ObjectTable.LocalPlayer == null)
                 return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false, string.Empty, string.Empty, string.Empty, 0, 0, string.Empty, string.Empty, -1);
 
             var localPlayer = Plugin.ObjectTable.LocalPlayer;
-            uint territoryId = Plugin.ClientState.TerritoryType;
+            var territoryId = Plugin.ClientState.TerritoryType;
 
             var housingManager = HousingManager.Instance();
             if (housingManager != null && housingManager->IsInside())
@@ -125,17 +156,17 @@ namespace Dalamud.RichPresence.Helpers
                 territoryId = LuminaService.Instance.GetOriginalTerritoryId(HousingManager.GetOriginalHouseTerritoryTypeId());
             }
 
-            string territoryName = string.Empty;
-            string territoryRegion = string.Empty;
-            uint territoryLoadingImageId = 1; // default loading image
+            var territoryName = string.Empty;
+            var territoryRegion = string.Empty;
+            var territoryLoadingImageId = (uint)1; // default loading image
 
             if (territoryId != 0)
             {
                 var territory = LuminaService.Instance.GetTerritoryType(territoryId);
                 if (territory != null)
                 {
-                    territoryName = territory.Value.PlaceName.Value.Name.ExtractText() ?? $"Unknown Territory {territoryId}";
-                    territoryRegion = territory.Value.PlaceNameRegion.Value.Name.ExtractText() ?? "Unknown Region";
+                    territoryName = territory.Value.PlaceName.Value.Name.ExtractText();
+                    territoryRegion = territory.Value.PlaceNameRegion.Value.Name.ExtractText();
                     territoryLoadingImageId = territory.Value.LoadingImage.RowId;
                 }
                 else
@@ -169,7 +200,7 @@ namespace Dalamud.RichPresence.Helpers
                 Level: localPlayer.Level
             );
         }
-        private static string GetStringSHA256Hash(string input)
+        private static string GetStringSha256Hash(string input)
         {
             if (string.IsNullOrEmpty(input)) return string.Empty;
             var textData = Encoding.UTF8.GetBytes(input);

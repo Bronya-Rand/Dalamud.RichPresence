@@ -1,79 +1,199 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
-using Dalamud.RichPresence.Models;
 using Dalamud.Utility;
 using System;
 using System.Numerics;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility.Raii;
 
 namespace Dalamud.RichPresence.Windows
 {
-    internal class ConfigWindow : Window, IDisposable
+    public sealed class ConfigWindow : Window, IDisposable
     {
         private readonly Configuration configuration;
-        public ConfigWindow(Plugin plugin) : base($"{Plugin.LocalizationService.Localize("DalamudRichPresenceConfiguration", LocalizationLanguage.Plugin)}##DiscordRPCSettings")
+
+        private string editingDetail;
+        private string editingState;
+        private string editingLargeImageText;
+        private string editingSmallImageText;
+        
+        public ConfigWindow(Plugin plugin) : 
+            base($"Discord Rich Presence##DiscordRPCSettings")
         {
-            Flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar;
+            Flags = ImGuiWindowFlags.NoCollapse 
+                    | ImGuiWindowFlags.AlwaysAutoResize 
+                    | ImGuiWindowFlags.HorizontalScrollbar;
 
-            Size = new Vector2(750, 520);
+            Size = new Vector2(500, 375);
             SizeCondition = ImGuiCond.Always;
-
+            
             configuration = plugin.Configuration;
         }
 
+        /// <summary>
+        /// Sets the editing fields for the config window.
+        /// </summary>
+        public override void OnOpen()
+        {
+            editingDetail = configuration.DiscordDetailField;
+            editingState = configuration.DiscordStateField;
+            editingLargeImageText = configuration.DiscordLargeImageTextField;
+            editingSmallImageText = configuration.DiscordSmallImageTextField;
+        }
+        
         public override void Draw()
         {
-            ImGui.Text(Plugin.LocalizationService.Localize("DalamudRichPresencePreface1", LocalizationLanguage.Plugin));
-            ImGui.Text(Plugin.LocalizationService.Localize("DalamudRichPresencePreface2", LocalizationLanguage.Plugin));
-            ImGui.Separator();
+            ImGui.Text("Rich Presence Template");
+            ImGui.Spacing();
 
-            ImGui.BeginChild("scrolling", ImGuiHelpers.ScaledVector2(0, 400), true, ImGuiWindowFlags.HorizontalScrollbar);
+            DrawTemplateInput("Details", "Type a custom message",
+                "Sets the top part of the Discord RPC header below the game's name.",
+                ref editingDetail,
+                v => configuration.DiscordDetailField = v,
+                () => { editingDetail = Constants.DefaultDiscordDetailStr; });
+            
+            DrawTemplateInput("State","Type a custom message",
+                "Sets the bottom part of the Discord RPC header below the game's name.",
+                ref editingState,
+                v => configuration.DiscordStateField = v,
+                () => { editingState = Constants.DefaultDiscordStateStr; });
+            
+            DrawTemplateInput("Large Image Text", "Type a custom message",
+                "Sets the text that appears when hovering over the large image.",
+                ref editingLargeImageText,
+                v => configuration.DiscordLargeImageTextField = v,
+                () => { editingLargeImageText = Constants.DefaultDiscordLargeImageStr; });
+            DrawTemplateInput("Small Image Text", "Type a custom message",
+                "Sets the text that appears when hovering over the small image.",
+                ref editingSmallImageText,
+                v => configuration.DiscordSmallImageTextField = v,
+                () => { editingSmallImageText = Constants.DefaultDiscordSmallImageStr; });
+            
+            ImGui.Spacing();
+            DrawTagGuideHeader();
+            
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+            
+            ImGui.Text("Rich Presence Conditions");
+            ImGui.Spacing();
+            
+            var showPartyData = configuration.ShowPartyData;
+            if (ImGui.Checkbox("Display Party Information", ref showPartyData))
+            {
+                configuration.ShowPartyData = showPartyData;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Displays how many people are in your party in Discord RPC (e.g. 7 of 8 players).");
+            
+            var showAfkStatus = configuration.ShowAfk;
+            if (ImGui.Checkbox("Display AFK Status", ref showAfkStatus))
+            {
+                configuration.ShowAfk = showAfkStatus;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Displays your AFK status to Discord");
 
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ImGuiHelpers.ScaledVector2(1, 3));
+            var hideAllWhileAfk = configuration.HideEntirelyWhenAfk;
+            if (ImGui.Checkbox("Hide RPC Info Whilst AFK", ref hideAllWhileAfk))
+            {
+                configuration.HideEntirelyWhenAfk = hideAllWhileAfk;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Hides most information about you when you are AFK to Discord.");
 
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowName", LocalizationLanguage.Plugin), ref configuration.ShowName);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowFreeCompany", LocalizationLanguage.Plugin), ref configuration.ShowFreeCompany);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowWorld", LocalizationLanguage.Plugin), ref configuration.ShowWorld);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceAlwaysShowHomeWorld", LocalizationLanguage.Plugin), ref configuration.AlwaysShowHomeWorld);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowDataCenter", LocalizationLanguage.Plugin), ref configuration.ShowDataCenter);
-            ImGui.Separator();
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowStartTime", LocalizationLanguage.Plugin), ref configuration.ShowStartTime);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceResetTimeWhenChangingZones", LocalizationLanguage.Plugin), ref configuration.ResetTimeWhenChangingZones);
-            ImGui.Separator();
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowLoginQueuePosition", LocalizationLanguage.Plugin), ref configuration.ShowLoginQueuePosition);
-            ImGui.TextColored(ImGuiColors.DalamudGrey, Plugin.LocalizationService.Localize("DalamudRichPresenceShowLoginQueuePositionDetail", LocalizationLanguage.Plugin));
-            ImGui.Separator();
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowJob", LocalizationLanguage.Plugin), ref configuration.ShowJob);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceAbbreviateJob", LocalizationLanguage.Plugin), ref configuration.AbbreviateJob);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowLevel", LocalizationLanguage.Plugin), ref configuration.ShowLevel);
-            ImGui.Separator();
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowParty", LocalizationLanguage.Plugin), ref configuration.ShowParty);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceShowAFK", LocalizationLanguage.Plugin), ref configuration.ShowAfk);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceHideAFKEntirely", LocalizationLanguage.Plugin), ref configuration.HideEntirelyWhenAfk);
-            ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceHideInCutscene", LocalizationLanguage.Plugin), ref configuration.HideInCutscene);
+            var hideInCutscenes = configuration.HideInCutscene;
+            if (ImGui.Checkbox("Hide RPC Info Whilst In Cutscene", ref hideInCutscenes))
+            {
+                configuration.HideInCutscene = hideInCutscenes;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Hides most information about you when you are watching a cutscene.");
 
             if (Util.IsWine())
             {
-                ImGui.Separator();
-                ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceRPCBridgeEnabled", LocalizationLanguage.Plugin), ref configuration.RPCBridgeEnabled);
-                ImGui.TextColored(ImGuiColors.DalamudGrey, Plugin.LocalizationService.Localize("DalamudRichPresenceRPCBridgeEnabledDetail", LocalizationLanguage.Plugin));
+                var useWineBridge = configuration.RPCBridgeEnabled;
+                if (ImGui.Checkbox("Use Wine RPC Bridge", ref useWineBridge))
+                {
+                    configuration.RPCBridgeEnabled = useWineBridge;
+                    configuration.Save();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Enables Discord RPC for Wine (macOS/Linux) users.");
             }
+        }
 
-            ImGui.PopStyleVar();
+        private static void DrawTagGuideHeader()
+        {
+            if (ImGui.CollapsingHeader("Available Tags"))
+            {
+                var availableWidth = ImGui.GetContentRegionAvail().X;
+                var style = ImGui.GetStyle();
 
-            ImGui.EndChild();
+                foreach (var (tag, description) in Constants.AvailableTags)
+                {
+                    var properTag = '{' + tag + '}';
+                    var tagWidth = ImGui.CalcTextSize(tag).X + style.FramePadding.X * 2;
 
-            ImGui.Separator();
+                    // Wrap to next line if this tag won't fit
+                    if (ImGui.GetCursorPosX() + tagWidth > availableWidth && ImGui.GetCursorPosX() > style.WindowPadding.X)
+                        ImGui.NewLine();
+                    
+                    ImGui.PushStyleColor(ImGuiCol.Button, ImGuiColors.ParsedGold with { W = 0.2f });
+                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGuiColors.ParsedGold with { W = 0.4f });
+                    if (ImGui.Button(properTag))
+                    {
+                        ImGui.SetClipboardText(properTag);
+                    }
+                    ImGui.PopStyleColor(2);
 
-            // TODO: Save and close button
-            //if (ImGui.Button(Plugin.LocalizationService.Localize("DalamudRichPresenceSaveAndClose", LocalizationLanguage.Plugin)))
-            //{
-            //    Plugin.DalamudPluginInterface.SavePluginConfig(this.configuration);
-            //    Plugin.configuration = this.configuration;
-            //    Plugin.PluginLog.Information("Settings saved.");
-            //    this.
-            //}
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip(description);
+
+                    ImGui.SameLine();
+                }
+                ImGui.NewLine();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Shows the available tags that can be used as input values.");
+        }
+        private void DrawTemplateInput(string label, string hint, string tooltip, ref string draft, Action<string> setter, Action reset)
+        {
+            using (ImRaii.PushId(label))
+            {
+                ImGui.InputTextWithHint($"##{label}_input", hint, ref draft, 128);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(tooltip);
+                
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Recycle))
+                {
+                    reset();
+                    setter(draft);
+                    configuration.Save();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Reset to Defaults");
+                
+                ImGui.SameLine();
+                if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
+                {
+                    setter(draft);
+                    configuration.Save();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Save Changes");
+
+                ImGui.SameLine();
+                ImGui.Text(label);
+            }
         }
 
         public void Dispose() => GC.SuppressFinalize(this);

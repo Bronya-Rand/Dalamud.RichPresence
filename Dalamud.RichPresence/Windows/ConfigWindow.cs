@@ -128,10 +128,10 @@ namespace Dalamud.RichPresence.Windows
 
             if (Util.IsWine())
             {
-                var useWineBridge = configuration.RPCBridgeEnabled;
+                var useWineBridge = configuration.RpcBridgeEnabled;
                 if (ImGui.Checkbox("Use Wine RPC Bridge", ref useWineBridge))
                 {
-                    configuration.RPCBridgeEnabled = useWineBridge;
+                    configuration.RpcBridgeEnabled = useWineBridge;
                     configuration.Save();
                 }
                 if (ImGui.IsItemHovered())

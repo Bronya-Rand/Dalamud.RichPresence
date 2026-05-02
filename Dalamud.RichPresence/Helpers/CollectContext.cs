@@ -62,15 +62,15 @@ namespace Dalamud.RichPresence.Helpers
         public QueueContext GetQueueStatus()
         {
             // Exit if user has disabled queue position or Waitingway states that we're not in a login queue.
-            if (!configuration.ShowLoginQueuePosition || !Plugin.IPCService.IsInLoginQueue())
+            if (!configuration.ShowLoginQueuePosition || !Plugin.IpcService.IsInLoginQueue())
                 return new QueueContext(false, -1, null);
 
-            var positionInQueue = Plugin.IPCService.GetQueuePosition();
+            var positionInQueue = Plugin.IpcService.GetQueuePosition();
             if (positionInQueue == -1)
                 // Queue position hasn't loaded yet.
                 return new QueueContext(false, -1, null);
 
-            var eta = Plugin.IPCService.GetQueueEstimate();
+            var eta = Plugin.IpcService.GetQueueEstimate();
             return new QueueContext(true, positionInQueue, eta);
         }
         public static OnlineStatusContext OnlineStatus

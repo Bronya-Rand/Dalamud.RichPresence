@@ -21,7 +21,7 @@ namespace Dalamud.RichPresence.Services
 
             CreateClient();
 
-            if (Util.IsWine() && configuration1.RPCBridgeEnabled)
+            if (Util.IsWine() && configuration1.RpcBridgeEnabled)
             {
                 StartWineRpcBridge();
             }

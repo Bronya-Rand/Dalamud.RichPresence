@@ -6,8 +6,8 @@ namespace Dalamud.RichPresence.Services;
 
 public static partial class ParserService
 {
-    private static readonly List<string> AcceptedTags = new()
-    {
+    private static readonly List<string> AcceptedTags =
+    [
         "playername",
         "world",
         "dc",
@@ -19,7 +19,7 @@ public static partial class ParserService
         "fc",
         "homeworld",
         "status"
-    };
+    ];
 
     /// <summary>
     /// Validates whether the string input is valid.

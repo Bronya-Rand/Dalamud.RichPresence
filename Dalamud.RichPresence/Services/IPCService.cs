@@ -4,20 +4,12 @@ using System;
 
 namespace Dalamud.RichPresence.Services
 {
-    internal class IPCService : IDisposable
+    internal class IpcService : IDisposable
     {
         // Waitingway IPCs
-        private readonly ICallGateSubscriber<int?> wwQueueType;
-        private readonly ICallGateSubscriber<int?> wwCurrentPosition;
-        private readonly ICallGateSubscriber<TimeSpan?> wwEstimatedTimeRemaining;
-
-        public IPCService()
-        {
-            wwQueueType = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.QueueType");
-            wwCurrentPosition = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.CurrentPosition");
-            wwEstimatedTimeRemaining =
-                Plugin.PluginInterface.GetIpcSubscriber<TimeSpan?>("Waitingway.EstimatedTimeRemaining");
-        }
+        private readonly ICallGateSubscriber<int?> wwQueueType = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.QueueType");
+        private readonly ICallGateSubscriber<int?> wwCurrentPosition = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.CurrentPosition");
+        private readonly ICallGateSubscriber<TimeSpan?> wwEstimatedTimeRemaining = Plugin.PluginInterface.GetIpcSubscriber<TimeSpan?>("Waitingway.EstimatedTimeRemaining");
 
         public bool IsInLoginQueue()
         {

@@ -12,7 +12,7 @@ using System;
 
 namespace Dalamud.RichPresence;
 
-    public sealed class Plugin : IDalamudPlugin, IDisposable
+    public sealed class Plugin : IDalamudPlugin
     {
         #region Dalamud Services
         [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
@@ -28,11 +28,11 @@ namespace Dalamud.RichPresence;
 
         #region Plugin Managers and Services
         public Configuration Configuration { get; init; }
-        public readonly WindowSystem WindowSystem = new("RichPresence");
+        private readonly WindowSystem windowSystem = new("RichPresence");
         private ConfigWindow ConfigWindow { get; init; }
         private LuminaService LuminaService { get; init; }
         internal static LocalizationService LocalizationService { get; private set; } = null!;
-        internal static IPCService IPCService { get; private set; } = null!;
+        internal static IpcService IpcService { get; private set; } = null!;
         private DiscordService DiscordService { get; init; }
         #endregion
 
@@ -42,14 +42,14 @@ namespace Dalamud.RichPresence;
         private bool inQueue;
 
         // Discord RPC defaults
-        private const string DEFAULT_LARGE_IMAGE_KEY = "li_1";
-        private const string DEFAULT_SMALL_IMAGE_KEY = "class_0";
-        private static readonly DiscordRPC.RichPresence DEFAULT_PRESENCE = new()
+        private const string DefaultLargeImageKey = "li_1";
+        private const string DefaultSmallImageKey = "class_0";
+        private static readonly DiscordRPC.RichPresence DefaultPresence = new()
         {
             Assets = new Assets
             {
-                LargeImageKey = DEFAULT_LARGE_IMAGE_KEY,
-                SmallImageKey = DEFAULT_SMALL_IMAGE_KEY,
+                LargeImageKey = DefaultLargeImageKey,
+                SmallImageKey = DefaultSmallImageKey,
             },
         };
         #endregion
@@ -62,14 +62,14 @@ namespace Dalamud.RichPresence;
             // Initialize services and managers
             LuminaService = new LuminaService(DataManager);
             LocalizationService = new LocalizationService();
-            IPCService = new IPCService();
+            IpcService = new IpcService();
             DiscordService = new DiscordService(this);
 
             ConfigWindow = new ConfigWindow(this);
 
-            WindowSystem.AddWindow(ConfigWindow);
+            windowSystem.AddWindow(ConfigWindow);
 
-            PluginInterface.UiBuilder.Draw += WindowSystem.Draw;
+            PluginInterface.UiBuilder.Draw += windowSystem.Draw;
             PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
 
             SetDefaultPresence();
@@ -117,12 +117,13 @@ namespace Dalamud.RichPresence;
         private void OnZoneChange(uint _) => UpdateStartTime();
 
         #endregion
-        public void ToggleConfigUi() => ConfigWindow.Toggle();
+
+        private void ToggleConfigUi() => ConfigWindow.Toggle();
 
         #region RPC Functions
         private void SetDefaultPresence()
         {
-            DiscordService.SetPresence(DEFAULT_PRESENCE);
+            DiscordService.SetPresence(DefaultPresence);
             DiscordService.UpdatePresenceDetails(LocalizationService.Localize("DalamudRichPresenceInMenus", LocalizationLanguage.Client));
             UpdateStartTime();
         }
@@ -143,7 +144,7 @@ namespace Dalamud.RichPresence;
 
                 if (ObjectTable.LocalPlayer == null)
                 {
-                    if (!Configuration.ShowLoginQueuePosition || !IPCService.IsInLoginQueue())
+                    if (!Configuration.ShowLoginQueuePosition || !IpcService.IsInLoginQueue())
                     {
                         if (inQueue)
                         {
@@ -153,10 +154,10 @@ namespace Dalamud.RichPresence;
                         return;
                     }
 
-                    var queuePos = IPCService.GetQueuePosition();
+                    var queuePos = IpcService.GetQueuePosition();
                     if (queuePos < 0) return; // Not loaded, wait for next update
 
-                    var queueEstimate = IPCService.GetQueueEstimate();
+                    var queueEstimate = IpcService.GetQueueEstimate();
                     inQueue = true;
 
                     // Create presence for login queue
@@ -203,10 +204,10 @@ namespace Dalamud.RichPresence;
 
             Framework.Update -= UpdatePresence;
 
-            PluginInterface.UiBuilder.Draw -= WindowSystem.Draw;
+            PluginInterface.UiBuilder.Draw -= windowSystem.Draw;
             PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
 
-            WindowSystem.RemoveAllWindows();
+            windowSystem.RemoveAllWindows();
             ConfigWindow.Dispose();
 
             LocalizationService.Dispose();

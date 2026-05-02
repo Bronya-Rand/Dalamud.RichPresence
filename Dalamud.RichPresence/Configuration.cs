@@ -66,7 +66,7 @@ public class Configuration : IPluginConfiguration
     /// <summary>
     /// Determines whether to enable the Wine RPC bridge (for Linux users).
     /// </summary>
-    public bool RPCBridgeEnabled = true;
+    public bool RpcBridgeEnabled = true;
     public void Save()
     {
         Plugin.PluginInterface.SavePluginConfig(this);

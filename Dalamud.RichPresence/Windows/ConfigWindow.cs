@@ -65,15 +65,12 @@ namespace Dalamud.RichPresence.Windows
             ImGui.EndChild();
 
             ImGui.Separator();
-
-            // TODO: Save and close button
-            //if (ImGui.Button(Plugin.LocalizationService.Localize("DalamudRichPresenceSaveAndClose", LocalizationLanguage.Plugin)))
-            //{
-            //    Plugin.DalamudPluginInterface.SavePluginConfig(this.configuration);
-            //    Plugin.configuration = this.configuration;
-            //    Plugin.PluginLog.Information("Settings saved.");
-            //    this.
-            //}
+            
+            if (ImGui.Button(Plugin.LocalizationService.Localize("DalamudRichPresenceSaveAndClose", LocalizationLanguage.Plugin)))
+            {
+                Plugin.PluginInterface.SavePluginConfig(this.configuration);
+                Plugin.Log.Information("Settings saved.");
+            }
         }
 
         public void Dispose() => GC.SuppressFinalize(this);

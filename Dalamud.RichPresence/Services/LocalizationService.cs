@@ -118,7 +118,7 @@ namespace Dalamud.RichPresence.Services
                 message = entry.Message;
                 return true;
             }
-            Plugin.Log.Debug("Failed to find localization message for key: " + key);
+            
             message = string.Empty;
             return false;
         }
@@ -132,7 +132,6 @@ namespace Dalamud.RichPresence.Services
                 ? clientLocalizationDictionary
                 : pluginLocalizationDictionary;
             
-            Plugin.Log.Debug("All passed");
             if (TryGetMessage(sourceDict, localizationStringKey, out var message))
                 return message;
 

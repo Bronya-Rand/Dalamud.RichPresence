@@ -57,6 +57,7 @@ namespace Dalamud.RichPresence;
         public Plugin()
         {
             // Load / create config
+            Migrate.TryMigrateFromLegacyConfig();
             Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 
             // Initialize services and managers

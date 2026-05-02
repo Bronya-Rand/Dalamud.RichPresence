@@ -17,18 +17,18 @@ namespace Dalamud.RichPresence.Services
 
         public DiscordService(Plugin plugin)
         {
-            var configuration = plugin.Configuration;
+            var configuration1 = plugin.Configuration;
 
             CreateClient();
 
-            if (Util.IsWine() && configuration.RPCBridgeEnabled)
+            if (Util.IsWine() && configuration1.RPCBridgeEnabled)
             {
                 StartWineRpcBridge();
             }
         }
         private void CreateClient()
         {
-            if (rpcClient.IsDisposed)
+            if (rpcClient == null || rpcClient.IsDisposed)
             {
                 rpcClient = new DiscordRpcClient(DiscordClientId)
                 {
@@ -36,7 +36,7 @@ namespace Dalamud.RichPresence.Services
 
                     Logger = new ConsoleLogger { Level = LogLevel.Warning }
                 };
-                rpcClient.OnPresenceUpdate += (_, e) => { Plugin.Log.Debug($"Received Presence Update: {e.Presence}"); };
+                rpcClient.OnPresenceUpdate += (sender, e) => { Plugin.Log.Debug($"Received Presence Update: {e.Presence}"); };
             }
 
             if (!rpcClient.IsInitialized)

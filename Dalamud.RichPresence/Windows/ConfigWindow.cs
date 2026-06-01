@@ -153,6 +153,15 @@ namespace Dalamud.RichPresence.Windows
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Hides most information about you when you are watching a cutscene.");
 
+            var resetTimerOnZoneChange = configuration.ResetTimeWhenChangingZones;
+            if (ImGui.Checkbox("Reset Timestamps When Changing Zones", ref resetTimerOnZoneChange))
+            {
+                configuration.ResetTimeWhenChangingZones = resetTimerOnZoneChange;
+                configuration.Save();
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Resets the timestamp timer when changing zones/duties. Otherwise, the timer will count based off login time.");
+
             if (Util.IsWine())
             {
                 var useWineBridge = configuration.RpcBridgeEnabled;

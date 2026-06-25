@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Dalamud.RichPresence.Helpers;
+using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Services;
 
@@ -13,7 +14,6 @@ public static partial class ParserService
         "dc",
         "job",
         "level",
-        "content",
         "location",
         "ward",
         "fc",
@@ -60,7 +60,6 @@ public static partial class ParserService
             "dc" => "Scion",
             "job" => config.AbbreviateJob ? "BLM" : "Black Mage",
             "level" => "100",
-            "content" => party.InDuty ? player.TerritoryName : string.Empty,
             "location" => player.TerritoryName,
             "ward" => string.Empty,
             "fc" => "\u00abFFXIV\u00bb",
@@ -73,10 +72,9 @@ public static partial class ParserService
             "dc" => player.DataCenterName,
             "job" => config.AbbreviateJob ? player.ClassJobAbbreviation : player.ClassJob,
             "level" => player.Level > 0 ? player.Level.ToString() : string.Empty,
-            "content" => party.InDuty ? player.TerritoryName : string.Empty,
             "location" => player.TerritoryName,
             "ward" => string.Empty, // Ward info not currently in PlayerContext
-            "fc" => $"\u00ab{player.FcTag}\u00bb",
+            "fc" => player.FcTag.IsNullOrEmpty() ? string.Empty : $"\u00ab{player.FcTag}\u00bb",
             "homeworld" => player.HomeWorld,
             "status" => status.StatusName,
             _ => string.Empty

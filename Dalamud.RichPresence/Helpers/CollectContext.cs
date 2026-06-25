@@ -1,5 +1,6 @@
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.RichPresence.Services;
+using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using System;
@@ -48,16 +49,27 @@ namespace Dalamud.RichPresence.Helpers
     /// <param name="ClassJobAbbreviation">The 3 letter abbreviation of the player's current class</param>
     /// <param name="Level">The player's level</param>
     public readonly record struct PlayerContext(
-        string PlayerName, string FcTag,
+        string PlayerName, string? FcTag,
         uint CurrentWorldId, string CurrentWorld,
         uint HomeWorldId, string HomeWorld,
         bool IsOnHomeWorld,
         string DataCenterName,
-        string TerritoryName, string TerritoryRegion, uint TerritoryLoadingImageId,
+        string TerritoryName, uint TerritoryLoadingImageId,
         uint ClassJobId, string ClassJob, string ClassJobAbbreviation, int Level);
     internal class CollectContext(Configuration configuration)
     {
         private readonly Configuration configuration = configuration;
+
+        /// <summary>
+        /// Stores the FC name (if any) of a player. Used for when transitioning from overworld to
+        /// duty where duties omit FC tags.
+        /// </summary>
+        private string? CachedFCName;
+
+        public void ClearCache()
+        {
+            CachedFCName = null;
+        }
 
         public QueueContext GetQueueStatus()
         {
@@ -142,22 +154,25 @@ namespace Dalamud.RichPresence.Helpers
                 );
             }
         }
-        public static unsafe PlayerContext GetPlayerStatus()
+        public unsafe PlayerContext GetPlayerStatus()
         {
             if (Plugin.ObjectTable.LocalPlayer == null)
-                return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false, string.Empty, string.Empty, string.Empty, 0, 0, string.Empty, string.Empty, -1);
+                return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false, string.Empty, string.Empty, 0, 0, string.Empty, string.Empty, -1);
 
             var localPlayer = Plugin.ObjectTable.LocalPlayer;
+            var fcTag = localPlayer.CompanyTag.TextValue;
+
+            // Cache the FC name for use in duties where the game doesn't provide it.
+            if ((CachedFCName == null && !fcTag.IsNullOrEmpty()) || (CachedFCName != null && !fcTag.IsNullOrEmpty() && CachedFCName != fcTag))
+                CachedFCName = fcTag;
+
             var territoryId = Plugin.ClientState.TerritoryType;
 
             var housingManager = HousingManager.Instance();
             if (housingManager != null && housingManager->IsInside())
-            {
                 territoryId = LuminaService.Instance.GetOriginalTerritoryId(HousingManager.GetOriginalHouseTerritoryTypeId());
-            }
 
             var territoryName = string.Empty;
-            var territoryRegion = string.Empty;
             var territoryLoadingImageId = (uint)1; // default loading image
 
             if (territoryId != 0)
@@ -166,14 +181,10 @@ namespace Dalamud.RichPresence.Helpers
                 if (territory != null)
                 {
                     territoryName = territory.Value.PlaceName.Value.Name.ExtractText();
-                    territoryRegion = territory.Value.PlaceNameRegion.Value.Name.ExtractText();
                     territoryLoadingImageId = territory.Value.LoadingImage.RowId;
                 }
                 else
-                {
                     territoryName = $"Unknown Territory {territoryId}";
-                    territoryRegion = "Unknown Region";
-                }
             }
 
             var currentWorldId = localPlayer.CurrentWorld.RowId;
@@ -184,7 +195,7 @@ namespace Dalamud.RichPresence.Helpers
 
             return new PlayerContext(
                 PlayerName: localPlayer.Name.TextValue,
-                FcTag: localPlayer.CompanyTag.TextValue,
+                FcTag: CachedFCName,
                 CurrentWorldId: currentWorldId,
                 CurrentWorld: currentWorld,
                 HomeWorldId: homeWorldId,
@@ -192,7 +203,6 @@ namespace Dalamud.RichPresence.Helpers
                 IsOnHomeWorld: currentWorldId == homeWorldId,
                 DataCenterName: dcName,
                 TerritoryName: territoryName,
-                TerritoryRegion: territoryRegion,
                 TerritoryLoadingImageId: territoryLoadingImageId,
                 ClassJobId: localPlayer.ClassJob.RowId,
                 ClassJob: localPlayer.ClassJob.Value.Name.ExtractText(),

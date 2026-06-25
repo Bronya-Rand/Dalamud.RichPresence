@@ -34,6 +34,7 @@ namespace Dalamud.RichPresence;
         internal static LocalizationService LocalizationService { get; private set; } = null!;
         internal static IpcService IpcService { get; private set; } = null!;
         private DiscordService DiscordService { get; init; }
+        private CollectContext CollectContext { get; init; }
         #endregion
 
         #region Initialization Variables
@@ -65,6 +66,7 @@ namespace Dalamud.RichPresence;
             LocalizationService = new LocalizationService();
             IpcService = new IpcService();
             DiscordService = new DiscordService(this);
+            CollectContext = new CollectContext(Configuration);
 
             ConfigWindow = new ConfigWindow(this);
 
@@ -112,6 +114,7 @@ namespace Dalamud.RichPresence;
         private void OnLogin() => UpdateStartTime();
         private void OnLogout(int type, int code)
         {
+            CollectContext.ClearCache();
             SetDefaultPresence();
             UpdateStartTime();
         }
@@ -141,7 +144,7 @@ namespace Dalamud.RichPresence;
             try
             {
                 var timestamp = Configuration.DisplayDiscordTimestamp ? new Timestamps(startTime) : null;
-                var context = new CollectContext(Configuration);
+                var context = CollectContext;
 
                 if (ObjectTable.LocalPlayer == null)
                 {
@@ -175,7 +178,7 @@ namespace Dalamud.RichPresence;
                 }
 
                 var presence = PresenceBuilder.Build(
-                    CollectContext.GetPlayerStatus(),
+                    context.GetPlayerStatus(),
                     context.GetPartyStatus(),
                     CollectContext.OnlineStatus,
                     timestamp,

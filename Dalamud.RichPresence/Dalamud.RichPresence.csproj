@@ -5,10 +5,6 @@
         <AssemblyVersion>2.0.9.1</AssemblyVersion>
 		<TargetFramework>net10.0-windows</TargetFramework>
     </PropertyGroup>
-    <PropertyGroup Label="Documentation">
-        <DocumentationFile />
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    </PropertyGroup>
     <ItemGroup>
         <PackageReference GeneratePathProperty="true" Include="DiscordRichPresence" Version="1.2.1.24" />
     </ItemGroup>

@@ -15,9 +15,9 @@ public static class Constants
         new("world",      "The current world you are in (e.g. Balmung)"),
         new("homeworld",  "Your home world (e.g. Goblin)"),
         new("dc",         "The data center you are in (e.g. Aether)"),
+        new("ward",       "The ward number of your current residential area (e.g. Ward 20)"),
         new("job",        "Your job name or abbreviation [if enabled] (e.g. Summoner or SMN)"),
         new("level",      "Your current level (e.g. 100)"),
-        new("location",   "The current location name you are in (e.g. New Gridania)"),
-        new("content",    "The name of the content you are doing (e.g. The Vault)"),
+        new("location",   "The current location name/content you are in/doing (e.g. New Gridania/Windurst)"),
     ];
 }

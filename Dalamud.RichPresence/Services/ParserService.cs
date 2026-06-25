@@ -73,7 +73,7 @@ public static partial class ParserService
             "job" => config.AbbreviateJob ? player.ClassJobAbbreviation : player.ClassJob,
             "level" => player.Level > 0 ? player.Level.ToString() : string.Empty,
             "location" => player.TerritoryName,
-            "ward" => string.Empty, // Ward info not currently in PlayerContext
+            "ward" => player.WardId > -1 ? $"Ward {player.WardId + 1}" : string.Empty,
             "fc" => player.FcTag.IsNullOrEmpty() ? string.Empty : $"\u00ab{player.FcTag}\u00bb",
             "homeworld" => player.HomeWorld,
             "status" => status.StatusName,

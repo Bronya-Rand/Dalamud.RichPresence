@@ -73,7 +73,7 @@ namespace Dalamud.RichPresence.Windows
             
             ImGui.Spacing();
             DrawTagGuideHeader();
-            
+
             ImGui.Spacing();
             ImGui.Separator();
             ImGui.Spacing();
@@ -191,13 +191,14 @@ namespace Dalamud.RichPresence.Windows
                     if (ImGui.GetCursorPosX() + tagWidth > availableWidth && ImGui.GetCursorPosX() > style.WindowPadding.X)
                         ImGui.NewLine();
                     
-                    ImGui.PushStyleColor(ImGuiCol.Button, ImGuiColors.ParsedGold with { W = 0.2f });
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGuiColors.ParsedGold with { W = 0.4f });
-                    if (ImGui.Button(properTag))
+                    using (ImRaii.PushColor(ImGuiCol.Button, ImGuiColors.ParsedGold with { W = 0.2f }))
+                    using (ImRaii.PushColor(ImGuiCol.ButtonHovered, ImGuiColors.ParsedGold with { W = 0.4f }))
                     {
-                        ImGui.SetClipboardText(properTag);
+                        if (ImGui.Button(properTag))
+                        {
+                            ImGui.SetClipboardText(properTag);
+                        }
                     }
-                    ImGui.PopStyleColor(2);
 
                     if (ImGui.IsItemHovered())
                         ImGui.SetTooltip(description);
@@ -206,8 +207,6 @@ namespace Dalamud.RichPresence.Windows
                 }
                 ImGui.NewLine();
             }
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Shows the available tags that can be used as input values.");
         }
         private void DrawTemplateInput(string label, string hint, string tooltip, ref string draft, Action<string> setter, Action reset)
         {

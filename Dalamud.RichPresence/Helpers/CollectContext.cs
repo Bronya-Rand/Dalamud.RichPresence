@@ -29,7 +29,7 @@ namespace Dalamud.RichPresence.Helpers
     /// <param name="PartyMaxSize">The max players the party can hold</param>
     /// <param name="HashedPartyId">An SHA-256 ID of the party</param>
     public readonly record struct PartyContext(bool InParty, bool InDuty, bool IsPartyCrossRealm, int PartySize, int PartyMaxSize, string HashedPartyId);
-    
+
     /// <summary>
     /// A record containing a player's info
     /// </summary>
@@ -42,8 +42,8 @@ namespace Dalamud.RichPresence.Helpers
     /// <param name="IsOnHomeWorld">Whether the player is in their homeworld</param>
     /// <param name="DataCenterName">The name of the data center the player is in</param>
     /// <param name="TerritoryName">The name of the territory the player is in</param>
-    /// <param name="TerritoryRegion">The region the territory the player is in resides</param>
     /// <param name="TerritoryLoadingImageId">The loading ID image of the region used for large images</param>
+    /// <param name="WardId">The ward ID of the player's current residential area</param>
     /// <param name="ClassJobId">The ID of the player's current class</param>
     /// <param name="ClassJob">The string of the player's current class</param>
     /// <param name="ClassJobAbbreviation">The 3 letter abbreviation of the player's current class</param>
@@ -54,7 +54,7 @@ namespace Dalamud.RichPresence.Helpers
         uint HomeWorldId, string HomeWorld,
         bool IsOnHomeWorld,
         string DataCenterName,
-        string TerritoryName, uint TerritoryLoadingImageId,
+        string TerritoryName, uint TerritoryLoadingImageId, sbyte WardId,
         uint ClassJobId, string ClassJob, string ClassJobAbbreviation, int Level);
     internal class CollectContext(Configuration configuration)
     {
@@ -157,7 +157,7 @@ namespace Dalamud.RichPresence.Helpers
         public unsafe PlayerContext GetPlayerStatus()
         {
             if (Plugin.ObjectTable.LocalPlayer == null)
-                return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false, string.Empty, string.Empty, 0, 0, string.Empty, string.Empty, -1);
+                return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false, string.Empty, string.Empty, 0, -1, 0, string.Empty, string.Empty, -1);
 
             var localPlayer = Plugin.ObjectTable.LocalPlayer;
             var fcTag = localPlayer.CompanyTag.TextValue;
@@ -172,6 +172,7 @@ namespace Dalamud.RichPresence.Helpers
             if (housingManager != null && housingManager->IsInside())
                 territoryId = LuminaService.Instance.GetOriginalTerritoryId(HousingManager.GetOriginalHouseTerritoryTypeId());
 
+            var wardId = housingManager->GetCurrentWard();
             var territoryName = string.Empty;
             var territoryLoadingImageId = (uint)1; // default loading image
 
@@ -204,6 +205,7 @@ namespace Dalamud.RichPresence.Helpers
                 DataCenterName: dcName,
                 TerritoryName: territoryName,
                 TerritoryLoadingImageId: territoryLoadingImageId,
+                WardId: wardId,
                 ClassJobId: localPlayer.ClassJob.RowId,
                 ClassJob: localPlayer.ClassJob.Value.Name.ExtractText(),
                 ClassJobAbbreviation: localPlayer.ClassJob.Value.Abbreviation.ExtractText(),

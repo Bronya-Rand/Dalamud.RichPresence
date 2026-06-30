@@ -56,8 +56,8 @@ namespace Dalamud.RichPresence.Windows
             if (Util.IsWine())
             {
                 ImGui.Separator();
-                ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceRPCBridgeEnabled", LocalizationLanguage.Plugin), ref configuration.RPCBridgeEnabled);
-                ImGui.TextColored(ImGuiColors.DalamudGrey, Plugin.LocalizationService.Localize("DalamudRichPresenceRPCBridgeEnabledDetail", LocalizationLanguage.Plugin));
+                ImGui.Checkbox(Plugin.LocalizationService.Localize("DalamudRichPresenceConnectDirectlyOnWine", LocalizationLanguage.Plugin), ref configuration.ConnectDirectlyOnWine);
+                ImGui.TextColored(ImGuiColors.DalamudGrey, Plugin.LocalizationService.Localize("DalamudRichPresenceConnectDirectlyOnWineDetail", LocalizationLanguage.Plugin));
             }
 
             ImGui.PopStyleVar();

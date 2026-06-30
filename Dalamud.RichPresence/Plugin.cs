@@ -58,6 +58,8 @@ namespace Dalamud.RichPresence
         {
             // Load / create config
             Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+            if (Configuration.Migrate())
+                PluginInterface.SavePluginConfig(Configuration);
 
             // Initialize services and managers
             LuminaService = new LuminaService(DataManager);

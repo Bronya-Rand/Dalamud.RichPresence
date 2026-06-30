@@ -1,10 +1,13 @@
 ﻿using Dalamud.Configuration;
+using Newtonsoft.Json;
 
 namespace Dalamud.RichPresence
 {
     class Configuration : IPluginConfiguration
     {
-        public int Version { get; set; } = 1;
+        private const int CurrentVersion = 2;
+
+        public int Version { get; set; } = CurrentVersion;
 
         // Show login queue position
         public bool ShowLoginQueuePosition = true;
@@ -36,6 +39,40 @@ namespace Dalamud.RichPresence
         public bool ShowAfk = true;
         public bool HideEntirelyWhenAfk = false;
         public bool HideInCutscene = false;
-        public bool RPCBridgeEnabled = true;
+
+        // On Linux/macOS (under Wine), connect directly to Discord's IPC socket instead of
+        // relying on an external bridge to provide the named pipe. Renamed from the former
+        // "RPCBridgeEnabled" option in configuration v2 (see Migrate()).
+        public bool ConnectDirectlyOnWine = true;
+
+        // Legacy alias for ConnectDirectlyOnWine, retained only to migrate pre-v2
+        // configurations. It is cleared (and dropped from disk) once Migrate() runs.
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool? RPCBridgeEnabled = null;
+
+        /// <summary>
+        /// Migrates older saved configurations in place. Returns true if anything changed
+        /// and the configuration should be persisted.
+        /// </summary>
+        public bool Migrate()
+        {
+            var changed = false;
+
+            // v1 -> v2: "RPCBridgeEnabled" was renamed to "ConnectDirectlyOnWine".
+            if (RPCBridgeEnabled.HasValue)
+            {
+                ConnectDirectlyOnWine = RPCBridgeEnabled.Value;
+                RPCBridgeEnabled = null;
+                changed = true;
+            }
+
+            if (Version < CurrentVersion)
+            {
+                Version = CurrentVersion;
+                changed = true;
+            }
+
+            return changed;
+        }
     }
 }

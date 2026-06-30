@@ -23,11 +23,5 @@
         <None Include="Resources/loc/*.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-		<None Include="Resources/binaries/WineRPCBridge.exe">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="Resources/binaries/WineRPCBridgeLICENSE.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
     </ItemGroup>
 </Project>

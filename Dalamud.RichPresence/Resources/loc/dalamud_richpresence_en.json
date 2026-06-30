@@ -119,12 +119,12 @@
     "message": "Hide rich presence during cutscenes",
     "description": "Dalamud.RichPresence.Configuration.HideInCutscene"
   },
-  "DalamudRichPresenceRPCBridgeEnabled": {
-    "message": "Enable Discord Rich Presence on Linux/macOS (Wine)",
-    "description": "Dalamud.RichPresence.Configuration.RPCBridgeEnabled"
+  "DalamudRichPresenceConnectDirectlyOnWine": {
+    "message": "Connect directly to Discord on Linux/macOS (Wine)",
+    "description": "Dalamud.RichPresence.Configuration.ConnectDirectlyOnWine"
   },
-  "DalamudRichPresenceRPCBridgeEnabledDetail": {
-    "message": "Connects directly to Discord's IPC socket when the game runs through Wine, including Flatpak and Snap installations of Discord (Applies on plugin restart).",
-    "description": "Dalamud.RichPresence.Configuration.RPCBridgeEnabledDetail"
+  "DalamudRichPresenceConnectDirectlyOnWineDetail": {
+    "message": "Connects directly to Discord's IPC socket when the game runs through Wine, including Flatpak and Snap installations of Discord. Disable this only if you rely on an external Discord RPC bridge (e.g. XIV on Mac). Applies on plugin restart.",
+    "description": "Dalamud.RichPresence.Configuration.ConnectDirectlyOnWineDetail"
   }
 }

@@ -27,7 +27,7 @@ namespace Dalamud.RichPresence.Services
                 // Under Wine (Linux/macOS) the default named-pipe transport cannot reach the
                 // host's Discord socket, so connect to it directly over a Unix domain socket.
                 INamedPipeClient? namedPipe = null;
-                if (Util.IsWine() && configuration.RPCBridgeEnabled)
+                if (Util.IsWine() && configuration.ConnectDirectlyOnWine)
                 {
                     namedPipe = new UnixSocketNamedPipeClient();
                 }

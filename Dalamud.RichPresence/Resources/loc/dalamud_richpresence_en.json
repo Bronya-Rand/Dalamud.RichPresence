@@ -120,11 +120,11 @@
     "description": "Dalamud.RichPresence.Configuration.HideInCutscene"
   },
   "DalamudRichPresenceRPCBridgeEnabled": {
-    "message": "Enable WINE RPC Bridge (Linux)",
+    "message": "Enable Discord Rich Presence on Linux/macOS (Wine)",
     "description": "Dalamud.RichPresence.Configuration.RPCBridgeEnabled"
   },
   "DalamudRichPresenceRPCBridgeEnabledDetail": {
-    "message": "Enable support for rich presence when running the game on Linux (Applies on plugin restart). For macOS users, please enable the wine bridge from XIV On Mac's settings instead.",
+    "message": "Connects directly to Discord's IPC socket when the game runs through Wine, including Flatpak and Snap installations of Discord (Applies on plugin restart).",
     "description": "Dalamud.RichPresence.Configuration.RPCBridgeEnabledDetail"
   }
 }

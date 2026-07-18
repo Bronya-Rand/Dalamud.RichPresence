@@ -6,17 +6,25 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Dalamud.RichPresence.Helpers;
+using Dalamud.RichPresence.Services;
 
 namespace Dalamud.RichPresence.Windows
 {
     public sealed class ConfigWindow : Window, IDisposable
     {
+        private readonly Plugin plugin;
         private readonly Configuration configuration;
 
         private string editingDetail = string.Empty;
         private string editingState = string.Empty;
         private string editingLargeImageText = string.Empty;
         private string editingSmallImageText = string.Empty;
+
+        // For showing a live preview of what gets sent to Discord.
+        private PlayerContext previewPlayer;
+        private PartyContext previewParty;
+        private OnlineStatusContext previewStatus;
 
         public ConfigWindow(Plugin plugin) :
             base($"Discord Rich Presence##DiscordRPCSettings")
@@ -28,7 +36,52 @@ namespace Dalamud.RichPresence.Windows
             Size = new Vector2(500, 475);
             SizeCondition = ImGuiCond.Always;
 
+            this.plugin = plugin;
             configuration = plugin.Configuration;
+        }
+        private void UpdatePreviewContext()
+        {
+            if (Plugin.ObjectTable.LocalPlayer != null)
+            {
+                previewPlayer = plugin.CollectContext.GetPlayerStatus();
+                previewParty = plugin.CollectContext.GetPartyStatus();
+                previewStatus = CollectContext.OnlineStatus;
+            }
+            else
+            {
+                previewPlayer = new PlayerContext(
+                    PlayerName: "Y'shtola Rhul",
+                    FcTag: "FFXIV",
+                    CurrentWorldId: 0,
+                    CurrentWorld: "Eorzea",
+                    HomeWorldId: 0,
+                    HomeWorld: "Hydaleyn",
+                    IsOnHomeWorld: true,
+                    DataCenterName: "Scion",
+                    TerritoryName: "Limsa Lominsa Lower Decks",
+                    TerritoryLoadingImageId: 1,
+                    WardId: 0,
+                    ClassJobId: 0,
+                    ClassJob: "Black Mage",
+                    ClassJobAbbreviation: "BLM",
+                    Level: 100
+                );
+
+                previewParty = new PartyContext(
+                    InParty: true,
+                    InDuty: false,
+                    IsPartyCrossRealm: false,
+                    PartySize: 4,
+                    PartyMaxSize: 8,
+                    HashedPartyId: "mock-party-id"
+                );
+
+                previewStatus = new OnlineStatusContext(
+                    IsAfk: false,
+                    WatchingCutscene: false,
+                    StatusName: "Online"
+                );
+            }
         }
 
         /// <summary>
@@ -44,6 +97,8 @@ namespace Dalamud.RichPresence.Windows
 
         public override void Draw()
         {
+            UpdatePreviewContext();
+
             ImGui.Text("Rich Presence Template");
             ImGui.Spacing();
 
@@ -224,6 +279,11 @@ namespace Dalamud.RichPresence.Windows
 
                 ImGui.SameLine();
                 ImGui.Text(label);
+
+                // Preview the result of the template parsing
+                var previewText = ParserService.Parse(draft, previewPlayer, previewParty, previewStatus, configuration);
+                ImGui.TextColored(ImGuiColors.DalamudGrey, previewText);
+                ImGui.Spacing();
             }
         }
 

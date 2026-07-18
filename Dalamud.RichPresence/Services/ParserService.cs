@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Dalamud.RichPresence.Helpers;
-using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Services;
 

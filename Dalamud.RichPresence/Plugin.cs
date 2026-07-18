@@ -36,7 +36,7 @@ public sealed class Plugin : IDalamudPlugin
     internal static LocalizationService LocalizationService { get; private set; } = null!;
     internal static WaitingwayIPC WaitingwayIPC { get; private set; } = null!;
     private DiscordService DiscordService { get; init; }
-    private CollectContext CollectContext { get; init; }
+    internal CollectContext CollectContext { get; init; }
     #endregion
 
     #region Initialization Variables

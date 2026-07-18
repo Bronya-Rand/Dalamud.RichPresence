@@ -1,9 +1,9 @@
-﻿using Dalamud.Utility;
-using DiscordRPC;
-using DiscordRPC.Logging;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Dalamud.Utility;
+using DiscordRPC;
+using DiscordRPC.Logging;
 
 namespace Dalamud.RichPresence.Services
 {

@@ -1,14 +1,14 @@
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Colors;
-using Dalamud.Utility;
 using System;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.RichPresence.Helpers;
 using Dalamud.RichPresence.Services;
+using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Windows
 {
@@ -30,8 +30,8 @@ namespace Dalamud.RichPresence.Windows
         public ConfigWindow(Plugin plugin) :
             base($"Discord Rich Presence##DiscordRPCSettings")
         {
-            Flags = ImGuiWindowFlags.NoCollapse 
-                    | ImGuiWindowFlags.AlwaysAutoResize 
+            Flags = ImGuiWindowFlags.NoCollapse
+                    | ImGuiWindowFlags.AlwaysAutoResize
                     | ImGuiWindowFlags.HorizontalScrollbar;
 
             Size = new Vector2(500, 475);
@@ -95,7 +95,7 @@ namespace Dalamud.RichPresence.Windows
             editingLargeImageText = configuration.DiscordLargeImageTextField;
             editingSmallImageText = configuration.DiscordSmallImageTextField;
         }
-        
+
         public override void Draw()
         {
             UpdatePreviewContext();
@@ -108,13 +108,13 @@ namespace Dalamud.RichPresence.Windows
                 ref editingDetail,
                 v => configuration.DiscordDetailField = v,
                 () => { editingDetail = Constants.DefaultDiscordDetailStr; });
-            
-            DrawTemplateInput("State","Type a custom message",
+
+            DrawTemplateInput("State", "Type a custom message",
                 "Sets the bottom part of the Discord RPC header below the game's name.",
                 ref editingState,
                 v => configuration.DiscordStateField = v,
                 () => { editingState = Constants.DefaultDiscordStateStr; });
-            
+
             DrawTemplateInput("Large Image Text", "Type a custom message",
                 "Sets the text that appears when hovering over the large image.",
                 ref editingLargeImageText,
@@ -125,17 +125,17 @@ namespace Dalamud.RichPresence.Windows
                 ref editingSmallImageText,
                 v => configuration.DiscordSmallImageTextField = v,
                 () => { editingSmallImageText = Constants.DefaultDiscordSmallImageStr; });
-            
+
             ImGui.Spacing();
             DrawTagGuideHeader();
 
             ImGui.Spacing();
             ImGui.Separator();
             ImGui.Spacing();
-            
+
             ImGui.Text("Rich Presence Conditions");
             ImGui.Spacing();
-            
+
             var showJobIcon = configuration.ShowJobIcon;
             if (ImGui.Checkbox("Display Job Icon for Small Image", ref showJobIcon))
             {
@@ -180,7 +180,7 @@ namespace Dalamud.RichPresence.Windows
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Displays the queue time when logging in (requires Waitingway).");
-            
+
             var showAfkStatus = configuration.ShowAfk;
             if (ImGui.Checkbox("Display AFK Status", ref showAfkStatus))
             {
@@ -245,7 +245,7 @@ namespace Dalamud.RichPresence.Windows
                     // Wrap to next line if this tag won't fit
                     if (ImGui.GetCursorPosX() + tagWidth > availableWidth && ImGui.GetCursorPosX() > style.WindowPadding.X)
                         ImGui.NewLine();
-                    
+
                     using (ImRaii.PushColor(ImGuiCol.Button, ImGuiColors.ParsedGold with { W = 0.2f }))
                     using (ImRaii.PushColor(ImGuiCol.ButtonHovered, ImGuiColors.ParsedGold with { W = 0.4f }))
                     {
@@ -270,7 +270,7 @@ namespace Dalamud.RichPresence.Windows
                 ImGui.InputTextWithHint($"##{label}_input", hint, ref draft, 128);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(tooltip);
-                
+
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Recycle))
                 {
@@ -280,7 +280,7 @@ namespace Dalamud.RichPresence.Windows
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Reset to Defaults");
-                
+
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
                 {

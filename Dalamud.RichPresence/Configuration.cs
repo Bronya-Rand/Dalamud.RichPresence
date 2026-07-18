@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Dalamud.Configuration;
 
 namespace Dalamud.RichPresence;
@@ -22,17 +22,17 @@ public class Configuration : IPluginConfiguration
     public string DiscordSmallImageTextField = "{location} {ward}";
     public string DiscordLargeImageTextField = "{job} Lv. {level}";
     public bool DisplayDiscordTimestamp = true;
-    
+
     /// <summary>
     /// Shows the queue you are on the Login Screen (uses Waitingway)
     /// </summary>
     public bool ShowLoginQueuePosition = true;
-    
+
     /// <summary>
     /// Determines whether to reset the RPC timer when moving zones
     /// </summary>
     public bool ResetTimeWhenChangingZones = true;
-    
+
     /// <summary>
     /// Whether to use "RDM" over "Red Mage"
     /// </summary>
@@ -42,27 +42,27 @@ public class Configuration : IPluginConfiguration
     /// Determines whether to use the job icon for the small image instead of the online status.
     /// </summary>
     public bool ShowJobIcon = true;
-    
+
     /// <summary>
     /// Whether to show party information in RPC
     /// </summary>
     public bool ShowPartyData = true;
-    
+
     /// <summary>
     /// Whether to show AFK status in RPC
     /// </summary>
     public bool ShowAfk = true;
-    
+
     /// <summary>
     /// Determines whether to hide info whilst AFK.
     /// </summary>
     public bool HideEntirelyWhenAfk = false;
-    
+
     /// <summary>
     /// Determines whether to hide info whilst in a cutscene.
     /// </summary>
     public bool HideInCutscene = false;
-    
+
     /// <summary>
     /// Determines whether to enable the Wine RPC bridge (for Linux users).
     /// </summary>

@@ -39,13 +39,13 @@ namespace Dalamud.RichPresence.Helpers
             var largeImageKey = player.TerritoryLoadingImageId != 0
                 ? $"li_{player.TerritoryLoadingImageId}"
                 : DefaultLargeImageKey;
-            var largeImageText = ParserService.Parse(configuration.DiscordLargeImageTextField, player, party, status, 
+            var largeImageText = ParserService.Parse(configuration.DiscordLargeImageTextField, player, party, status,
                 configuration);
 
-            var smallImageKey = configuration.ShowJobIcon 
-                ? $"class_{player.ClassJobId}" 
+            var smallImageKey = configuration.ShowJobIcon
+                ? $"class_{player.ClassJobId}"
                 : DefaultSmallImageKey;
-            var smallImageText = ParserService.Parse(configuration.DiscordSmallImageTextField, player, party, status, 
+            var smallImageText = ParserService.Parse(configuration.DiscordSmallImageTextField, player, party, status,
                 configuration);
 
             var presence = new DiscordRPC.RichPresence
@@ -66,7 +66,7 @@ namespace Dalamud.RichPresence.Helpers
             if (party.InParty)
             {
                 if (party.InDuty)
-                    presence.State = loc.Localize("DalamudRichPresenceInADuty", 
+                    presence.State = loc.Localize("DalamudRichPresenceInADuty",
                         LocalizationLanguage.Client);
 
                 presence.Party = new Party
@@ -79,7 +79,7 @@ namespace Dalamud.RichPresence.Helpers
 
             // --- AFK overrides State and small image (lower priority than hide-entirely, already handled above) ---
             if (!status.IsAfk || !configuration.ShowAfk) return presence;
-            
+
             presence.State = status.StatusName;
             presence.Assets.SmallImageKey = "away";
 
@@ -97,13 +97,13 @@ namespace Dalamud.RichPresence.Helpers
             var loc = Plugin.LocalizationService;
 
             var eta = queue.Estimate?.TotalSeconds >= 1d
-                ? string.Format(loc.Localize("DalamudRichPresenceQueueEstimate", 
+                ? string.Format(loc.Localize("DalamudRichPresenceQueueEstimate",
                     LocalizationLanguage.Client), queue.Estimate)
                 : string.Empty;
 
             return new DiscordRPC.RichPresence
             {
-                Details = string.Format(loc.Localize("DalamudRichPresenceInLoginQueue", 
+                Details = string.Format(loc.Localize("DalamudRichPresenceInLoginQueue",
                     LocalizationLanguage.Client), queue.Position),
                 State = eta,
                 Assets = new Assets

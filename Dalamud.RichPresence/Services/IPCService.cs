@@ -1,6 +1,6 @@
-﻿using Dalamud.Plugin.Ipc;
-using Dalamud.Plugin.Ipc.Exceptions;
 using System;
+using Dalamud.Plugin.Ipc;
+using Dalamud.Plugin.Ipc.Exceptions;
 
 namespace Dalamud.RichPresence.Services
 {

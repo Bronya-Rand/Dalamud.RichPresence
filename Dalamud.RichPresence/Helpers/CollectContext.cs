@@ -1,12 +1,12 @@
+using System;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.RichPresence.Services;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
-using System;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Dalamud.RichPresence.Helpers
 {
@@ -18,7 +18,7 @@ namespace Dalamud.RichPresence.Helpers
     /// <param name="WatchingCutscene">Whether the player is watching a cutscene</param>
     /// <param name="StatusName">The status the player has at the moment</param>
     public readonly record struct OnlineStatusContext(bool IsAfk, bool WatchingCutscene, string StatusName);
-    
+
     /// <summary>
     /// A record containing a player's party info
     /// </summary>
@@ -134,9 +134,9 @@ namespace Dalamud.RichPresence.Helpers
 
                 var partySize = InfoProxyCrossRealm.GetGroupMemberCount(infoProxyCrossRealm->LocalPlayerGroupIndex);
 
-                if (partySize <= 0) 
+                if (partySize <= 0)
                     return new PartyContext(false, false, false, -1, -1, string.Empty);
-                    
+
                 var memberArray = new CrossRealmMember[partySize];
                 for (var i = 0u; i < partySize; i++)
                 {

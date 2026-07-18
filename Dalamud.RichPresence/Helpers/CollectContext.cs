@@ -96,11 +96,11 @@ namespace Dalamud.RichPresence.Helpers
                     || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
                     || Plugin.Condition[ConditionFlag.WatchingCutscene78];
 
-                var onlineStatusRowId = localPlayer.OnlineStatus.RowId;
-                var onlineStatusStr = LuminaService.Instance.GetOnlineStatusName(onlineStatusRowId);
+                var onlineStatusRowId = localPlayer.OnlineStatus.Value.RowId;
+                var onlineStatusStr = localPlayer.OnlineStatus.Value.Name.ExtractText();
 
                 return new OnlineStatusContext(
-                    IsAfk: onlineStatusRowId == 17, // Row 17 has the AFK icon status
+                    IsAfk: onlineStatusRowId == 17, // Row 17 has the AFK status in the game
                     WatchingCutscene: watchingCutscene,
                     StatusName: onlineStatusStr
                 );

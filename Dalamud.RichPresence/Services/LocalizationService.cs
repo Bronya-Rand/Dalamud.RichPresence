@@ -1,11 +1,11 @@
-using Dalamud.Game;
-using Dalamud.RichPresence.Models;
-using Dalamud.Utility;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using Dalamud.Game;
+using Dalamud.RichPresence.Models;
+using Dalamud.Utility;
+using Newtonsoft.Json;
 
 namespace Dalamud.RichPresence.Services
 {
@@ -118,7 +118,7 @@ namespace Dalamud.RichPresence.Services
                 message = entry.Message;
                 return true;
             }
-            
+
             message = string.Empty;
             return false;
         }
@@ -131,7 +131,7 @@ namespace Dalamud.RichPresence.Services
             var sourceDict = localizationSource == LocalizationLanguage.Client
                 ? clientLocalizationDictionary
                 : pluginLocalizationDictionary;
-            
+
             if (TryGetMessage(sourceDict, localizationStringKey, out var message))
                 return message;
 

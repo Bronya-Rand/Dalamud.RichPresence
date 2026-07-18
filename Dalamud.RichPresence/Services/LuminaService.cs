@@ -1,15 +1,15 @@
-﻿using Dalamud.Plugin.Services;
+using System;
+using Dalamud.Plugin.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using Lumina.Extensions;
-using System;
 
 namespace Dalamud.RichPresence.Services
 {
     internal class LuminaService : IDisposable
     {
         public static LuminaService Instance { get; private set; } = null!;
-        private IDataManager DataManager { get; set;  }
+        private IDataManager DataManager { get; set; }
 
         private readonly ExcelSheet<World> worlds;
         private readonly ExcelSheet<TerritoryType> territoryTypes;
@@ -27,7 +27,7 @@ namespace Dalamud.RichPresence.Services
             onlineStatus = DataManager.GetExcelSheet<OnlineStatus>();
             contentFinderConditions = DataManager.GetExcelSheet<ContentFinderCondition>();
         }
-        public string GetWorldName(uint worldId) => 
+        public string GetWorldName(uint worldId) =>
             worlds.TryGetRow(worldId, out var row) ? row.Name.ExtractText() : $"Unknown World ({worldId})";
         public string GetTerritoryName(uint territoryId)
         {

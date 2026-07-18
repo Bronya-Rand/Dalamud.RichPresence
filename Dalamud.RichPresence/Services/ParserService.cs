@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Dalamud.RichPresence.Helpers;
-using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Services;
 
@@ -94,7 +93,7 @@ public static partial class ParserService
     public static string Parse(string input, PlayerContext player, PartyContext party, OnlineStatusContext status, Configuration config)
     {
         if (string.IsNullOrEmpty(input)) return input;
-        
+
         var compiledRegex = DiscordXivRegex();
 
         return compiledRegex.Replace(input, match =>

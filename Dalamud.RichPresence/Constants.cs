@@ -7,7 +7,7 @@ public static class Constants
     public const string DefaultDiscordStateStr = "{world}";
     public const string DefaultDiscordLargeImageStr = "{location}";
     public const string DefaultDiscordSmallImageStr = "{job} Lv. {level}";
-    
+
     public static readonly TagDefinition[] AvailableTags =
     [
         new("playername", "Your character's name (e.g. Y'shtola Rhul)"),

@@ -1,12 +1,13 @@
 using Dalamud.RichPresence.Models;
+using Dalamud.RichPresence.Services;
 using DiscordRPC;
 
 namespace Dalamud.RichPresence.Helpers
 {
     internal static class PresenceBuilder
     {
-        private const string DEFAULT_LARGE_IMAGE_KEY = "li_1";
-        private const string DEFAULT_SMALL_IMAGE_KEY = "class_0";
+        private const string DefaultLargeImageKey = "li_1";
+        private const string DefaultSmallImageKey = "class_0";
 
         /// <summary>
         /// Builds a Discord rich presence from the collected context structs.
@@ -25,73 +26,27 @@ namespace Dalamud.RichPresence.Helpers
             if (status.WatchingCutscene && configuration.HideInCutscene)
                 return null;
 
-            if (status.IsAFK && configuration.HideEntirelyWhenAfk)
+            if (status.IsAfk && configuration.HideEntirelyWhenAfk)
                 return null;
 
             // --- Details (line 1) ---
-            string details;
-            if (configuration.ShowName)
-            {
-#if DEBUG
-                details = "Y'shtola Rhul";
-#else
-                details = player.PlayerName;
-#endif
-
-                if (configuration.ShowFreeCompany && player.IsOnHomeWorld && !string.IsNullOrEmpty(player.FcTag))
-#if DEBUG
-                    details = $"{details} \u00abFC\u00bb";
-#else
-                    details = $"{details} \u00ab{player.FcTag}\u00bb";
-#endif
-                if (configuration.ShowWorld && !player.IsOnHomeWorld)
-                    details = $"{details} \u2740 {player.HomeWorld}";
-                else if (configuration.AlwaysShowHomeWorld)
-                    details = $"{details} \u2740 {player.HomeWorld}";
-            }
-            else
-            {
-                details = player.TerritoryName;
-            }
+            var details = ParserService.Parse(configuration.DiscordDetailField, player, party, status, configuration);
 
             // --- State (line 2) — lowest-priority default, overwritten by duty/AFK below ---
-            string state;
-            if (configuration.ShowWorld)
-            {
-#if DEBUG
-                state = "Test World";
-                if (configuration.ShowDataCenter)
-                    state = $"{state} (Test Data Center)";
-#else
-                state = player.CurrentWorld;
-                if (configuration.ShowDataCenter)
-                    state = $"{state} ({player.DataCenterName})";
-#endif
-            }
-            else
-            {
-                state = configuration.ShowName ? player.TerritoryName : player.TerritoryRegion;
-            }
+            var state = ParserService.Parse(configuration.DiscordStateField, player, party, status, configuration);
 
             // --- Images ---
             var largeImageKey = player.TerritoryLoadingImageId != 0
                 ? $"li_{player.TerritoryLoadingImageId}"
-                : DEFAULT_LARGE_IMAGE_KEY;
-            var largeImageText = player.TerritoryName;
+                : DefaultLargeImageKey;
+            var largeImageText = ParserService.Parse(configuration.DiscordLargeImageTextField, player, party, status,
+                configuration);
 
-            var smallImageKey = DEFAULT_SMALL_IMAGE_KEY;
-            var smallImageText = loc.Localize("DalamudRichPresenceOnline", LocalizationLanguage.Client);
-
-            if (configuration.ShowJob)
-            {
-                smallImageKey = $"class_{player.ClassJobId}";
-                smallImageText = configuration.AbbreviateJob
-                    ? player.ClassJobAbbreviation
-                    : loc.TitleCase(player.ClassJob);
-
-                if (configuration.ShowLevel)
-                    smallImageText = $"{smallImageText} {string.Format(loc.Localize("DalamudRichPresenceLevel", LocalizationLanguage.Client), player.Level)}";
-            }
+            var smallImageKey = configuration.ShowJobIcon
+                ? $"class_{player.ClassJobId}"
+                : DefaultSmallImageKey;
+            var smallImageText = ParserService.Parse(configuration.DiscordSmallImageTextField, player, party, status,
+                configuration);
 
             var presence = new DiscordRPC.RichPresence
             {
@@ -111,7 +66,8 @@ namespace Dalamud.RichPresence.Helpers
             if (party.InParty)
             {
                 if (party.InDuty)
-                    presence.State = loc.Localize("DalamudRichPresenceInADuty", LocalizationLanguage.Client);
+                    presence.State = loc.Localize("DalamudRichPresenceInADuty",
+                        LocalizationLanguage.Client);
 
                 presence.Party = new Party
                 {
@@ -122,11 +78,10 @@ namespace Dalamud.RichPresence.Helpers
             }
 
             // --- AFK overrides State and small image (lower priority than hide-entirely, already handled above) ---
-            if (status.IsAFK && configuration.ShowAfk)
-            {
-                presence.State = status.StatusName;
-                presence.Assets.SmallImageKey = "away";
-            }
+            if (!status.IsAfk || !configuration.ShowAfk) return presence;
+
+            presence.State = status.StatusName;
+            presence.Assets.SmallImageKey = "away";
 
             return presence;
         }
@@ -142,17 +97,19 @@ namespace Dalamud.RichPresence.Helpers
             var loc = Plugin.LocalizationService;
 
             var eta = queue.Estimate?.TotalSeconds >= 1d
-                ? string.Format(loc.Localize("DalamudRichPresenceQueueEstimate", LocalizationLanguage.Client), queue.Estimate)
+                ? string.Format(loc.Localize("DalamudRichPresenceQueueEstimate",
+                    LocalizationLanguage.Client), queue.Estimate)
                 : string.Empty;
 
             return new DiscordRPC.RichPresence
             {
-                Details = string.Format(loc.Localize("DalamudRichPresenceInLoginQueue", LocalizationLanguage.Client), queue.Position),
+                Details = string.Format(loc.Localize("DalamudRichPresenceInLoginQueue",
+                    LocalizationLanguage.Client), queue.Position),
                 State = eta,
                 Assets = new Assets
                 {
-                    LargeImageKey = DEFAULT_LARGE_IMAGE_KEY,
-                    SmallImageKey = DEFAULT_SMALL_IMAGE_KEY,
+                    LargeImageKey = DefaultLargeImageKey,
+                    SmallImageKey = DefaultSmallImageKey,
                 },
                 Timestamps = timestamps,
             };

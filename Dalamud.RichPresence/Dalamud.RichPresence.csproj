@@ -1,13 +1,9 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/15.0.0">
-	<PropertyGroup>
+    <PropertyGroup>
         <AssemblyName>Dalamud.RichPresence</AssemblyName>
         <NoWarn>IDE0003</NoWarn>
-        <AssemblyVersion>2.0.8.2</AssemblyVersion>
-		<TargetFramework>net10.0-windows</TargetFramework>
-    </PropertyGroup>
-    <PropertyGroup Label="Documentation">
-        <DocumentationFile />
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <AssemblyVersion>2.0.9.2</AssemblyVersion>
+        <TargetFramework>net10.0-windows</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference GeneratePathProperty="true" Include="DiscordRichPresence" Version="1.2.1.24" />
@@ -23,11 +19,11 @@
         <None Include="Resources/loc/*.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-		<None Include="Resources/binaries/WineRPCBridge.exe">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="Resources/binaries/WineRPCBridgeLICENSE.txt">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+        <None Include="Resources/binaries/WineRPCBridge.exe">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="Resources/binaries/WineRPCBridgeLICENSE.txt">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 </Project>

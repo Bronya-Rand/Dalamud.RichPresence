@@ -1,56 +1,55 @@
-﻿using Dalamud.Utility;
-using DiscordRPC;
-using DiscordRPC.Logging;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Dalamud.Utility;
+using DiscordRPC;
+using DiscordRPC.Logging;
 
 namespace Dalamud.RichPresence.Services
 {
     internal class DiscordService : IDisposable
     {
-        private static DirectoryInfo WINE_RPC_BRIDGE_PATH => new(Path.Combine(Plugin.PluginInterface.AssemblyLocation.Directory!.FullName, "Resources/binaries", "WineRPCBridge.exe"));
+        private static DirectoryInfo WineRpcBridgePath => new(Path.Combine(Plugin.PluginInterface.AssemblyLocation.Directory!.FullName, "Resources/binaries", "WineRPCBridge.exe"));
 
-        private const string DISCORD_CLIENT_ID = "478143453536976896";
-        private DiscordRpcClient RpcClient = null!;
+        private const string DiscordClientId = "478143453536976896";
+        private DiscordRpcClient rpcClient = null!;
         private Process? rpcBridgeProcess;
-
-        private readonly Configuration configuration;
 
         public DiscordService(Plugin plugin)
         {
-            configuration = plugin.Configuration;
+            var configuration1 = plugin.Configuration;
 
             CreateClient();
 
-            if (Util.IsWine() && configuration.RPCBridgeEnabled)
+            if (Util.IsWine() && configuration1.RpcBridgeEnabled)
             {
-                StartWineRPCBridge();
+                StartWineRpcBridge();
             }
         }
         private void CreateClient()
         {
-            if (RpcClient == null || RpcClient.IsDisposed)
+            if (rpcClient == null || rpcClient.IsDisposed)
             {
-                RpcClient = new DiscordRpcClient(DISCORD_CLIENT_ID)
+                rpcClient = new DiscordRpcClient(DiscordClientId)
                 {
                     SkipIdenticalPresence = true,
 
                     Logger = new ConsoleLogger { Level = LogLevel.Warning }
                 };
-                RpcClient.OnPresenceUpdate += (sender, e) => { Plugin.Log.Debug($"Received Presence Update: {e.Presence}"); };
+                rpcClient.OnPresenceUpdate += (sender, e) => { Plugin.Log.Debug($"Received Presence Update: {e.Presence}"); };
             }
 
-            if (!RpcClient.IsInitialized)
-                RpcClient.Initialize();
+            if (!rpcClient.IsInitialized)
+                rpcClient.Initialize();
         }
-        public void StartWineRPCBridge()
+
+        private void StartWineRpcBridge()
         {
             try
             {
                 // Find existing bridge process.
-                var wineBridge = Process.GetProcessesByName(WINE_RPC_BRIDGE_PATH.Name);
-                if (wineBridge != null && wineBridge.Length > 0)
+                var wineBridge = Process.GetProcessesByName(WineRpcBridgePath.Name);
+                if (wineBridge.Length > 0)
                 {
                     Plugin.Log.Info($"Wine RPC Bridge found (PID: {wineBridge[0].Id}), skipping creation.");
                     rpcBridgeProcess = wineBridge[0];
@@ -58,10 +57,10 @@ namespace Dalamud.RichPresence.Services
                 }
 
                 // Start the bridge.
-                Plugin.Log.Info($"Starting Wine RPC Bridge: {WINE_RPC_BRIDGE_PATH}");
+                Plugin.Log.Info($"Starting Wine RPC Bridge: {WineRpcBridgePath}");
                 rpcBridgeProcess = Process.Start(new ProcessStartInfo
                 {
-                    FileName = WINE_RPC_BRIDGE_PATH.FullName,
+                    FileName = WineRpcBridgePath.FullName,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                 })!;
@@ -75,22 +74,22 @@ namespace Dalamud.RichPresence.Services
         public void SetPresence(DiscordRPC.RichPresence presence)
         {
             CreateClient();
-            RpcClient.SetPresence(presence);
+            rpcClient.SetPresence(presence);
         }
         public void ClearPresence()
         {
             CreateClient();
-            RpcClient.ClearPresence();
+            rpcClient.ClearPresence();
         }
         public void UpdatePresenceDetails(string details)
         {
             CreateClient();
-            RpcClient.UpdateDetails(details);
+            rpcClient.UpdateDetails(details);
         }
         public void UpdatePresenceStartTime(DateTime startTime)
         {
             CreateClient();
-            RpcClient.UpdateStartTime(startTime);
+            rpcClient.UpdateStartTime(startTime);
         }
         public void Dispose()
         {
@@ -100,7 +99,7 @@ namespace Dalamud.RichPresence.Services
                 Plugin.Log.Info("Disposed Wine RPC Bridge process.");
             }
 
-            RpcClient.Dispose();
+            rpcClient.Dispose();
         }
     }
 }

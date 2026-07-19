@@ -15,7 +15,7 @@ namespace Dalamud.RichPresence.Services.Discord
         private Socket? socket;
         private NetworkStream? networkStream;
         private string? socketPath;
-        private int connectedPipe;
+        private int connectedPipe = -1;
 
         public ILogger Logger { get; set; } = null!;
 

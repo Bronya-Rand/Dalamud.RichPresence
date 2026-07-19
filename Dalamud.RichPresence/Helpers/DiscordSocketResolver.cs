@@ -19,6 +19,10 @@ namespace Dalamud.RichPresence.Helpers
             // Snap
             "snap.discord"
         ];
+        
+        // Other possible locations for Discord's socket
+        private static readonly string[] TempDirEnvVars = ["TMPDIR", "TEMP", "TMP"];
+
         private static bool TrySocketExists(string socketPath)
         {
             using var testSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
@@ -34,24 +38,46 @@ namespace Dalamud.RichPresence.Helpers
                 return false;
             }
         }
+        private static string? ResolveRuntimeBaseDir()
+        {
+            var xdgRuntimeDir = Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR");
+            if (!xdgRuntimeDir.IsNullOrEmpty())
+                return xdgRuntimeDir;
+
+            var wineHostXDGRuntimeDir = Environment.GetEnvironmentVariable("WINE_HOST_XDG_RUNTIME_DIR");
+            if (!wineHostXDGRuntimeDir.IsNullOrEmpty())
+                return wineHostXDGRuntimeDir;
+
+            // Test fallback environment variables for temp directories
+            foreach (var envVar in TempDirEnvVars)
+            {
+                var tempDir = Environment.GetEnvironmentVariable(envVar);
+                if (!tempDir.IsNullOrEmpty())
+                    return tempDir;
+            }
+
+            Plugin.Log.Warning("XDG_RUNTIME_DIR and temp directory environment variables are not set. Possible Wine Bug or missing environment variable.");
+            return null;
+        }
         public static string? FindSocket(int pipe)
         {
             // Exit if not on Wine
             if (!Util.IsWine())
                 return null;
 
-            Plugin.Log.Debug($"Searching for Discord socket (pipe {pipe}) on Wine...");
-            var xdgRuntimeDir = Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR");
-            if (xdgRuntimeDir.IsNullOrEmpty())
+            Plugin.Log.Info($"Searching for Discord socket (pipe {pipe}) on Wine...");
+            var runtimeDir = ResolveRuntimeBaseDir();
+            Plugin.Log.Debug($"Resolved runtime directory: {runtimeDir ?? "null"}");
+            if (runtimeDir.IsNullOrEmpty())
             {
-                Plugin.Log.Warning("XDG_RUNTIME_DIR environment variable is not set. Cannot find Discord socket.");
+                Plugin.Log.Warning("Could not resolve a valid runtime directory for Discord socket search. Please check your environment variable configuration.");
                 return null;
             }
 
             // Look for the Discord socket (0-9)
             foreach (var subdir in SandboxSubdirectories)
             {
-                string basePath = Path.Combine(xdgRuntimeDir, subdir);
+                string basePath = Path.Combine(runtimeDir, subdir);
                 string socketPath = Path.Combine(basePath, $"discord-ipc-{pipe}");
 
                 Plugin.Log.Debug($"Trying Discord socket at: {socketPath}");

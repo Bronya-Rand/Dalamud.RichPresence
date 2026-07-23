@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -194,6 +195,7 @@ namespace Dalamud.RichPresence.Helpers
             var homeWorld = localPlayer.HomeWorld.Value.Name.ExtractText();
             var dcName = localPlayer.CurrentWorld.Value.DataCenter.Value.Name.ExtractText();
             var classJob = localPlayer.ClassJob.Value.Name.ExtractText();
+            var textInfo = CultureInfo.CurrentCulture.TextInfo;
 
             return new PlayerContext(
                 PlayerName: localPlayer.Name.TextValue,
@@ -208,7 +210,7 @@ namespace Dalamud.RichPresence.Helpers
                 TerritoryLoadingImageId: territoryLoadingImageId,
                 WardId: wardId,
                 ClassJobId: localPlayer.ClassJob.RowId,
-                ClassJob: string.Concat(classJob[0].ToString().ToUpperInvariant(), classJob.AsSpan(1)),
+                ClassJob: textInfo.ToTitleCase(classJob),
                 ClassJobAbbreviation: localPlayer.ClassJob.Value.Abbreviation.ExtractText(),
                 Level: localPlayer.Level
             );

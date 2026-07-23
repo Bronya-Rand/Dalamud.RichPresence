@@ -23,6 +23,24 @@ namespace Dalamud.RichPresence.Helpers
         // Other possible locations for Discord's socket
         private static readonly string[] TempDirEnvVars = ["TMPDIR", "TEMP", "TMP"];
 
+        private static bool? AFUnixSupported;
+
+        public static bool IsAfUnixSupported()
+        {
+            if (AFUnixSupported.HasValue) return AFUnixSupported.Value;
+
+            try
+            {
+                using var probe = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+                AFUnixSupported = true;
+            }
+            catch (SocketException)
+            {
+                AFUnixSupported = false;
+            }
+
+            return AFUnixSupported.Value;
+        }
         private static bool TrySocketExists(string socketPath)
         {
             using var testSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
@@ -35,6 +53,11 @@ namespace Dalamud.RichPresence.Helpers
             }
             catch (SocketException)
             {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.Error($"Unexpected error while checking socket existence: {ex.Message}");
                 return false;
             }
         }
@@ -62,7 +85,7 @@ namespace Dalamud.RichPresence.Helpers
         public static string? FindSocket(int pipe)
         {
             // Exit if not on Wine
-            if (!Util.IsWine())
+            if (!Util.IsWine() || !IsAfUnixSupported())
                 return null;
 
             Plugin.Log.Info($"Searching for Discord socket (pipe {pipe}) on Wine...");
@@ -78,10 +101,9 @@ namespace Dalamud.RichPresence.Helpers
             foreach (var subdir in SandboxSubdirectories)
             {
                 string basePath = Path.Combine(runtimeDir, subdir);
-                string socketPath = Path.Combine(basePath, $"discord-ipc-{pipe}");
+                string socketPath = Path.Combine(basePath, $"discord-ipc-{pipe}").Replace("\\", "/");
 
                 Plugin.Log.Debug($"Trying Discord socket at: {socketPath}");
-
                 if (TrySocketExists(socketPath))
                 {
                     Plugin.Log.Info($"Discord socket (pipe {pipe}) found at: {socketPath}");

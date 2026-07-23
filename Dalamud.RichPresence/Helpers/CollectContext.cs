@@ -193,6 +193,7 @@ namespace Dalamud.RichPresence.Helpers
             var homeWorldId = localPlayer.HomeWorld.RowId;
             var homeWorld = localPlayer.HomeWorld.Value.Name.ExtractText();
             var dcName = localPlayer.CurrentWorld.Value.DataCenter.Value.Name.ExtractText();
+            var classJob = localPlayer.ClassJob.Value.Name.ExtractText();
 
             return new PlayerContext(
                 PlayerName: localPlayer.Name.TextValue,
@@ -207,7 +208,7 @@ namespace Dalamud.RichPresence.Helpers
                 TerritoryLoadingImageId: territoryLoadingImageId,
                 WardId: wardId,
                 ClassJobId: localPlayer.ClassJob.RowId,
-                ClassJob: localPlayer.ClassJob.Value.Name.ExtractText(),
+                ClassJob: string.Concat(classJob[0].ToString().ToUpperInvariant(), classJob.AsSpan(1)),
                 ClassJobAbbreviation: localPlayer.ClassJob.Value.Abbreviation.ExtractText(),
                 Level: localPlayer.Level
             );

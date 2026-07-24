@@ -91,7 +91,6 @@ public static class Migrate
             ShowAfk = oldCfg.ShowAfk,
             HideEntirelyWhenAfk = oldCfg.HideEntirelyWhenAfk,
             HideInCutscene = oldCfg.HideInCutscene,
-            RpcBridgeEnabled = oldCfg.RPCBridgeEnabled,
             DisplayDiscordTimestamp = oldCfg.ShowStartTime,
 
             // new option: choose a sensible default

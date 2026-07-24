@@ -75,15 +75,15 @@ namespace Dalamud.RichPresence.Helpers
         public QueueContext GetQueueStatus()
         {
             // Exit if user has disabled queue position or Waitingway states that we're not in a login queue.
-            if (!configuration.ShowLoginQueuePosition || !Plugin.IpcService.IsInLoginQueue())
+            if (!configuration.ShowLoginQueuePosition || !Plugin.WaitingwayIPC.IsInLoginQueue())
                 return new QueueContext(false, -1, null);
 
-            var positionInQueue = Plugin.IpcService.GetQueuePosition();
+            var positionInQueue = Plugin.WaitingwayIPC.GetQueuePosition();
             if (positionInQueue == -1)
                 // Queue position hasn't loaded yet.
                 return new QueueContext(false, -1, null);
 
-            var eta = Plugin.IpcService.GetQueueEstimate();
+            var eta = Plugin.WaitingwayIPC.GetQueueEstimate();
             return new QueueContext(true, positionInQueue, eta);
         }
         public static OnlineStatusContext OnlineStatus
@@ -97,11 +97,11 @@ namespace Dalamud.RichPresence.Helpers
                     || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
                     || Plugin.Condition[ConditionFlag.WatchingCutscene78];
 
-                var onlineStatusRowId = localPlayer.OnlineStatus.RowId;
-                var onlineStatusStr = LuminaService.Instance.GetOnlineStatusName(onlineStatusRowId);
+                var onlineStatusRowId = localPlayer.OnlineStatus.Value.RowId;
+                var onlineStatusStr = localPlayer.OnlineStatus.Value.Name.ExtractText();
 
                 return new OnlineStatusContext(
-                    IsAfk: onlineStatusRowId == 17, // Row 17 has the AFK icon status
+                    IsAfk: onlineStatusRowId == 17, // Row 17 has the AFK status in the game
                     WatchingCutscene: watchingCutscene,
                     StatusName: onlineStatusStr
                 );

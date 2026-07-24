@@ -50,9 +50,6 @@ namespace Dalamud.RichPresence.Services
             return null;
         }
         public uint GetOriginalTerritoryId(uint territoryId) => territoryTypes.GetRow(territoryId).RowId;
-        public string GetOnlineStatusName(uint statusId) => onlineStatus.TryGetRow(statusId, out var row)
-            ? row.Name.ExtractText()
-            : $"Unknown Status ({statusId})";
         public ContentFinderCondition? GetContentFinderConditionOfClient() => contentFinderConditions.FirstOrNull(c => c.TerritoryType.RowId == Plugin.ClientState.TerritoryType);
         public void Dispose()
         {

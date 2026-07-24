@@ -19,7 +19,7 @@ namespace Dalamud.RichPresence.Helpers
             // Snap
             "snap.discord"
         ];
-        
+
         // Other possible locations for Discord's socket
         private static readonly string[] TempDirEnvVars = ["TMPDIR", "TEMP", "TMP"];
 

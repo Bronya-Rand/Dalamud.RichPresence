@@ -19,8 +19,8 @@ public class Configuration : IPluginConfiguration
     /// </summary>
     public string DiscordDetailField = "{playername} {fc}";
     public string DiscordStateField = "{world}";
-    public string DiscordSmallImageTextField = "{location} {ward}";
-    public string DiscordLargeImageTextField = "{job} Lv. {level}";
+    public string DiscordSmallImageTextField = "{job} Lv. {level}";
+    public string DiscordLargeImageTextField = "{location} {ward}";
     public bool DisplayDiscordTimestamp = true;
 
     /// <summary>

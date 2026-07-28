@@ -62,11 +62,6 @@ public class Configuration : IPluginConfiguration
     /// Determines whether to hide info whilst in a cutscene.
     /// </summary>
     public bool HideInCutscene = false;
-
-    /// <summary>
-    /// Determines whether to enable the Wine RPC bridge (for Linux users).
-    /// </summary>
-    public bool RpcBridgeEnabled = true;
     public void Save()
     {
         Plugin.PluginInterface.SavePluginConfig(this);

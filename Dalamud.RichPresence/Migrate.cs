@@ -8,26 +8,26 @@ internal sealed class LegacyConfigurationV1 : IPluginConfiguration
 {
     public int Version { get; set; } = 1;
 
-    public readonly bool ShowLoginQueuePosition = true;
-    public readonly bool ShowName = true;
-    public readonly bool ShowFreeCompany = true;
-    public readonly bool ShowWorld = true;
-    public readonly bool AlwaysShowHomeWorld = false;
-    public readonly bool ShowDataCenter = false;
+    public bool ShowLoginQueuePosition { get; set; } = true;
+    public bool ShowName { get; set; } = true;
+    public bool ShowFreeCompany { get; set; } = true;
+    public bool ShowWorld { get; set; } = true;
+    public bool AlwaysShowHomeWorld { get; set; } = false;
+    public bool ShowDataCenter { get; set; } = false;
 
-    public readonly bool ShowStartTime = false;
-    public readonly bool ResetTimeWhenChangingZones = true;
+    public bool ShowStartTime { get; set; } = false;
+    public bool ResetTimeWhenChangingZones { get; set; } = true;
 
-    public readonly bool ShowJob = true;
-    public readonly bool AbbreviateJob = true;
-    public readonly bool ShowLevel = true;
+    public bool ShowJob { get; set; } = true;
+    public bool AbbreviateJob { get; set; } = true;
+    public bool ShowLevel { get; set; } = true;
 
-    public readonly bool ShowParty = true;
+    public bool ShowParty { get; set; } = true;
 
-    public readonly bool ShowAfk = true;
-    public readonly bool HideEntirelyWhenAfk = false;
-    public readonly bool HideInCutscene = false;
-    public readonly bool RPCBridgeEnabled = true;
+    public bool ShowAfk { get; set; } = true;
+    public bool HideEntirelyWhenAfk { get; set; } = false;
+    public bool HideInCutscene { get; set; } = false;
+    public bool RPCBridgeEnabled { get; set; } = true;
 }
 
 public static class Migrate
@@ -38,6 +38,13 @@ public static class Migrate
         if (pluginConfiguration == null)
             return null;
 
+        var configPath = Plugin.PluginInterface.ConfigFile.FullName;
+        if (!File.Exists(configPath))
+        {
+            Plugin.Log.Warning("Config file not found on disk for migration. Using defaults.");
+            return null;
+        }
+
         // If it's already V2+, no migration needed.
         if (pluginConfiguration.Version >= 2)
         {
@@ -47,13 +54,6 @@ public static class Migrate
 
         // V1 Config
         Plugin.Log.Info("Detected V1 config. Attempting migration to V2.");
-
-        var configPath = Plugin.PluginInterface.ConfigFile.FullName;
-        if (!File.Exists(configPath))
-        {
-            Plugin.Log.Warning("Config file not found on disk for migration. Using defaults.");
-            return null;
-        }
 
         try
         {

@@ -7,6 +7,8 @@ using Dalamud.Plugin.Services;
 using Dalamud.RichPresence.Helpers;
 using Dalamud.RichPresence.Models;
 using Dalamud.RichPresence.Services;
+using Dalamud.RichPresence.Services.Discord;
+using Dalamud.RichPresence.Services.IPC;
 using Dalamud.RichPresence.Windows;
 using DiscordRPC;
 
@@ -24,6 +26,7 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
     [PluginService] internal static IObjectTable ObjectTable { get; set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
+    [PluginService] internal static INotificationManager NotificationManager { get; private set; } = null!;
     #endregion
 
     #region Plugin Managers and Services
@@ -32,7 +35,7 @@ public sealed class Plugin : IDalamudPlugin
     private ConfigWindow ConfigWindow { get; init; }
     private LuminaService LuminaService { get; init; }
     internal static LocalizationService LocalizationService { get; private set; } = null!;
-    internal static IpcService IpcService { get; private set; } = null!;
+    internal static WaitingwayIPC WaitingwayIPC { get; private set; } = null!;
     private DiscordService DiscordService { get; init; }
     internal CollectContext CollectContext { get; init; }
     #endregion
@@ -64,8 +67,8 @@ public sealed class Plugin : IDalamudPlugin
         // Initialize services and managers
         LuminaService = new LuminaService(DataManager);
         LocalizationService = new LocalizationService();
-        IpcService = new IpcService();
-        DiscordService = new DiscordService(this);
+        WaitingwayIPC = new WaitingwayIPC();
+        DiscordService = new DiscordService();
         CollectContext = new CollectContext(Configuration);
 
         ConfigWindow = new ConfigWindow(this);
@@ -148,7 +151,7 @@ public sealed class Plugin : IDalamudPlugin
 
             if (ObjectTable.LocalPlayer == null)
             {
-                if (!Configuration.ShowLoginQueuePosition || !IpcService.IsInLoginQueue())
+                if (!Configuration.ShowLoginQueuePosition || !WaitingwayIPC.IsInLoginQueue())
                 {
                     if (inQueue)
                     {
@@ -158,10 +161,10 @@ public sealed class Plugin : IDalamudPlugin
                     return;
                 }
 
-                var queuePos = IpcService.GetQueuePosition();
+                var queuePos = WaitingwayIPC.GetQueuePosition();
                 if (queuePos < 0) return; // Not loaded, wait for next update
 
-                var queueEstimate = IpcService.GetQueueEstimate();
+                var queueEstimate = WaitingwayIPC.GetQueueEstimate();
                 inQueue = true;
 
                 // Create presence for login queue

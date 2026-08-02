@@ -8,7 +8,6 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.RichPresence.Helpers;
 using Dalamud.RichPresence.Services;
-using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Windows
 {
@@ -216,18 +215,6 @@ namespace Dalamud.RichPresence.Windows
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Resets the timestamp timer when changing zones/duties. Otherwise, the timer will count based off login time.");
-
-            if (Util.IsWine())
-            {
-                var useWineBridge = configuration.RpcBridgeEnabled;
-                if (ImGui.Checkbox("Use Wine RPC Bridge", ref useWineBridge))
-                {
-                    configuration.RpcBridgeEnabled = useWineBridge;
-                    configuration.Save();
-                }
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Enables Discord RPC for Wine (macOS/Linux) users.");
-            }
         }
 
         private static void DrawTagGuideHeader()

@@ -29,12 +29,14 @@ namespace Dalamud.RichPresence.Services.Discord
                     if (DiscordSocketResolver.IsAfUnixSupported())
                         unixSocket = new DiscordUnixSocket();
                     else
-                        IsProtonTenEnvironment = true;
-                    Plugin.NotificationManager.AddNotification(new Notification
                     {
-                        Content = "Discord RPC is unavailable on this Wine/Proton build. Switch to Wine 10.8/Proton 11-1 or higher.",
-                        Type = NotificationType.Error
-                    });
+                        IsProtonTenEnvironment = true;
+                        Plugin.NotificationManager.AddNotification(new Notification
+                        {
+                            Content = "Discord RPC is unavailable on this Wine/Proton build. Switch to Wine 10.8/Proton 11-1 or higher.",
+                            Type = NotificationType.Error
+                        });
+                    }
                 }
 
                 RpcClient = new DiscordRpcClient(DiscordClientId, client: unixSocket)

@@ -66,24 +66,32 @@ namespace Dalamud.RichPresence.Services.Discord
         public void SetPresence(DiscordRPC.RichPresence presence)
         {
             CreateClient();
+            if (RpcClient == null) return;
             lastPresence = presence;
             RpcClient.SetPresence(presence);
         }
         public void ClearPresence()
         {
             CreateClient();
+            if (RpcClient == null) return;
             RpcClient.ClearPresence();
         }
         public void UpdatePresenceDetails(string details)
         {
             CreateClient();
+            if (RpcClient == null) return;
             RpcClient.UpdateDetails(details);
         }
         public void UpdatePresenceStartTime(DateTime startTime)
         {
             CreateClient();
+            if (RpcClient == null) return;
             RpcClient.UpdateStartTime(startTime);
         }
-        public void Dispose() => RpcClient.Dispose();
+        public void Dispose()
+        {
+            if (RpcClient == null) return;
+            RpcClient.Dispose();
+        }
     }
 }

@@ -38,6 +38,11 @@ namespace Dalamud.RichPresence.Helpers
             {
                 AFUnixSupported = false;
             }
+            catch (Exception ex)
+            {
+                Plugin.Log.Warning(ex, "AF_UNIX probe failed");
+                AFUnixSupported = false;
+            }
 
             return AFUnixSupported.Value;
         }

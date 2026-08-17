@@ -10,37 +10,48 @@ namespace Dalamud.RichPresence.Services.Discord
 {
     internal class DiscordService : IDisposable
     {
+        private readonly Configuration configuration;
         private const string DiscordClientId = "478143453536976896";
-        private volatile bool IsProtonTenEnvironment = false;
 
         private DiscordRpcClient RpcClient = null!;
         private DiscordRPC.RichPresence? lastPresence;
+        private volatile bool TcpBridgeNotificationShown = false;
 
-        public DiscordService() => CreateClient();
+        public DiscordService(Configuration configuration)
+        {
+            this.configuration = configuration;
+            CreateClient();
+        }
+
         private void CreateClient()
         {
-            if (IsProtonTenEnvironment) return;
-
             if (RpcClient == null || RpcClient.IsDisposed)
             {
-                INamedPipeClient? unixSocket = null;
+                INamedPipeClient? rpcTransport = null;
                 if (Util.IsWine())
                 {
-                    if (DiscordSocketResolver.IsAfUnixSupported())
-                        unixSocket = new DiscordUnixSocket();
+                    if (AfUnixHelper.IsAfUnixSupported())
+                        rpcTransport = new DiscordUnixSocket();
                     else
                     {
-                        IsProtonTenEnvironment = true;
-                        Plugin.NotificationManager.AddNotification(new Notification
+                        if (configuration.UseCustomRpcTcpBridgePort)
+                            rpcTransport = new DiscordTcpSocket(port: configuration.RpcTcpBridgePort);
+                        else
+                            rpcTransport = new DiscordTcpSocket();
+                        if (!TcpBridgeNotificationShown)
                         {
-                            Content = "Discord RPC is unavailable on this Wine/Proton build. Switch to Wine 10.8/Proton 11-1 or higher.",
-                            Type = NotificationType.Error
-                        });
-                        return;
+                            TcpBridgeNotificationShown = true;
+                            Plugin.NotificationManager.AddNotification(new Notification
+                            {
+                                Title = "TCP Bridge Required",
+                                Content = Constants.RPCTCPBridgeWarning,
+                                Type = NotificationType.Warning,
+                            });
+                        }
                     }
                 }
 
-                RpcClient = new DiscordRpcClient(DiscordClientId, client: unixSocket)
+                RpcClient = new DiscordRpcClient(DiscordClientId, client: rpcTransport)
                 {
                     SkipIdenticalPresence = true,
                     Logger = new ConsoleLogger { Level = LogLevel.Warning }
@@ -92,6 +103,11 @@ namespace Dalamud.RichPresence.Services.Discord
         {
             if (RpcClient == null) return;
             RpcClient.Dispose();
+        }
+        public void ReloadClient()
+        {
+            Dispose();
+            CreateClient();
         }
     }
 }

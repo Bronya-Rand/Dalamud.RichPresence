@@ -1,6 +1,6 @@
 using System;
 using System.Net.Sockets;
-using Dalamud.RichPresence.Helpers;
+using Dalamud.RichPresence.Shared;
 using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Services.Discord
@@ -10,8 +10,19 @@ namespace Dalamud.RichPresence.Services.Discord
     /// </summary>
     internal class DiscordUnixSocket : DiscordUnixStream
     {
+        private readonly SocketResolver socketResolver;
         private Socket? socket;
         private string? socketPath;
+
+        public DiscordUnixSocket()
+        {
+            socketResolver = new SocketResolver
+            {
+                LogCallback = message => Plugin.Log.Info(message),
+                LogErrorCallback = (ex, message) => Plugin.Log.Error(ex, message),
+                LogDebugCallback = message => Plugin.Log.Debug(message)
+            };
+        }
         public override bool Connect(int pipe)
         {
             try
@@ -21,7 +32,7 @@ namespace Dalamud.RichPresence.Services.Discord
                     // Find the first available Discord socket (0-9)
                     for (var i = 0; i < 10; i++)
                     {
-                        var discordSocketPath = DiscordSocketResolver.FindSocket(i);
+                        var discordSocketPath = socketResolver.FindSocket(i);
                         if (!discordSocketPath.IsNullOrEmpty())
                         {
                             socketPath = discordSocketPath;
@@ -33,7 +44,7 @@ namespace Dalamud.RichPresence.Services.Discord
                 else
                 {
                     // Use the specified pipe number
-                    socketPath = DiscordSocketResolver.FindSocket(pipe);
+                    socketPath = socketResolver.FindSocket(pipe);
                     connectedPipe = pipe;
                 }
                 if (socketPath.IsNullOrEmpty())

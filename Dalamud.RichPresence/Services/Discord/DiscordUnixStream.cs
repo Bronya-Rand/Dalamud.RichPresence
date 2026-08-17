@@ -124,9 +124,9 @@ namespace Dalamud.RichPresence.Services.Discord
                 }
                 return true;
             }
-            catch (SocketException e)
+            catch (SocketException ex)
             {
-                Plugin.Log.Error($"Error checking Discord connection (pipe {connectedPipe}): {e.Message}");
+                Plugin.Log.Error(ex, $"Error checking Discord connection (pipe {connectedPipe})");
                 return false;
             }
         }

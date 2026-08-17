@@ -62,6 +62,8 @@ public class Configuration : IPluginConfiguration
     /// Determines whether to hide info whilst in a cutscene.
     /// </summary>
     public bool HideInCutscene = false;
+    public bool UseCustomRpcTcpBridgePort = false;
+    public int RpcTcpBridgePort = 2026;
     public void Save()
     {
         Plugin.PluginInterface.SavePluginConfig(this);

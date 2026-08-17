@@ -1,12 +1,18 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using Dalamud.Utility;
 
-namespace Dalamud.RichPresence.Helpers
+namespace Dalamud.RichPresence.Shared
 {
-    internal static class DiscordSocketResolver
+    /// <summary>
+    /// A shared class between the Discord RPC Unix socket and the Discord
+    /// RPC TCP bridge that resolves the Discord socket path on Wine, Linux and macOS
+    /// </summary>
+    public class SocketResolver
     {
+        public Action<string>? LogCallback;
+        public Action<string>? LogDebugCallback;
+        public Action<Exception?, string>? LogErrorCallback;
         private static readonly string[] SandboxSubdirectories =
         [
             "", // Native
@@ -21,27 +27,8 @@ namespace Dalamud.RichPresence.Helpers
         ];
 
         // Other possible locations for Discord's socket
-        private static readonly string[] TempDirEnvVars = ["TMPDIR", "TEMP", "TMP"];
-
-        private static bool? AFUnixSupported;
-
-        public static bool IsAfUnixSupported()
-        {
-            if (AFUnixSupported.HasValue) return AFUnixSupported.Value;
-
-            try
-            {
-                using var probe = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
-                AFUnixSupported = true;
-            }
-            catch (SocketException)
-            {
-                AFUnixSupported = false;
-            }
-
-            return AFUnixSupported.Value;
-        }
-        private static bool TrySocketExists(string socketPath)
+        private static readonly string[] TempDirEnvVars = ["TMPDIR", "TMP", "TEMP"];
+        private bool TrySocketExists(string socketPath)
         {
             using var testSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
             try
@@ -57,45 +44,49 @@ namespace Dalamud.RichPresence.Helpers
             }
             catch (Exception ex)
             {
-                Plugin.Log.Error($"Unexpected error while checking socket existence: {ex.Message}");
+                LogErrorCallback?.Invoke(ex, $"Unexpected error while checking socket existence at {socketPath}");
                 return false;
             }
         }
-        private static string? ResolveRuntimeBaseDir()
+
+        /// <summary>
+        /// Resolves the base directory for where the Discord socket would be located.
+        /// </summary>
+        /// <returns>The base directory for the runtime.</returns>
+        public static string ResolveRuntimeBaseDir()
         {
+            // Check both instances of XDG_RUNTIME_DIR
             var xdgRuntimeDir = Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR");
-            if (!xdgRuntimeDir.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(xdgRuntimeDir))
                 return xdgRuntimeDir;
 
             var wineHostXDGRuntimeDir = Environment.GetEnvironmentVariable("WINE_HOST_XDG_RUNTIME_DIR");
-            if (!wineHostXDGRuntimeDir.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(wineHostXDGRuntimeDir))
                 return wineHostXDGRuntimeDir;
 
             // Test fallback environment variables for temp directories
             foreach (var envVar in TempDirEnvVars)
             {
                 var tempDir = Environment.GetEnvironmentVariable(envVar);
-                if (!tempDir.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(tempDir))
                     return tempDir;
             }
 
-            Plugin.Log.Warning("XDG_RUNTIME_DIR and temp directory environment variables are not set. Possible Wine Bug or missing environment variable.");
-            return null;
+            // According to Discord docs, `/tmp` is the final fallback to check for the socket
+            return "/tmp";
         }
-        public static string? FindSocket(int pipe)
-        {
-            // Exit if not on Wine
-            if (!Util.IsWine() || !IsAfUnixSupported())
-                return null;
 
-            Plugin.Log.Info($"Searching for Discord socket (pipe {pipe}) on Wine...");
+        /// <summary>
+        /// Finds the Discord socket path for the given pipe number (0-9) on
+        /// Wine, Linux, and macOS.
+        /// </summary>
+        /// <param name="pipe">The pipe number (0-9) to search for.</param>
+        /// <returns>The path to the Discord socket, or null if not found.</returns>
+        public string? FindSocket(int pipe)
+        {
+            LogCallback?.Invoke($"Searching for Discord socket (pipe {pipe})...");
             var runtimeDir = ResolveRuntimeBaseDir();
-            Plugin.Log.Debug($"Resolved runtime directory: {runtimeDir ?? "null"}");
-            if (runtimeDir.IsNullOrEmpty())
-            {
-                Plugin.Log.Warning("Could not resolve a valid runtime directory for Discord socket search. Please check your environment variable configuration.");
-                return null;
-            }
+            LogDebugCallback?.Invoke($"Resolved runtime directory: {runtimeDir}");
 
             // Look for the Discord socket (0-9)
             foreach (var subdir in SandboxSubdirectories)
@@ -103,15 +94,15 @@ namespace Dalamud.RichPresence.Helpers
                 string basePath = Path.Combine(runtimeDir, subdir);
                 string socketPath = Path.Combine(basePath, $"discord-ipc-{pipe}").Replace("\\", "/");
 
-                Plugin.Log.Debug($"Trying Discord socket at: {socketPath}");
+                LogDebugCallback?.Invoke($"Trying Discord socket at: {socketPath}");
                 if (TrySocketExists(socketPath))
                 {
-                    Plugin.Log.Info($"Discord socket (pipe {pipe}) found at: {socketPath}");
+                    LogCallback?.Invoke($"Discord socket (pipe {pipe}) found at: {socketPath}");
                     return socketPath;
                 }
             }
 
-            Plugin.Log.Debug($"Discord socket (pipe {pipe}) not found.");
+            LogDebugCallback?.Invoke($"Discord socket (pipe {pipe}) not found.");
             return null;
         }
     }

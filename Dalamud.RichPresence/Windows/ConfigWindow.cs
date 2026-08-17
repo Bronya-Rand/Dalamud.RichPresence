@@ -1,13 +1,16 @@
 using System;
+using System.IO;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.RichPresence.Helpers;
 using Dalamud.RichPresence.Services;
+using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Windows
 {
@@ -127,6 +130,69 @@ namespace Dalamud.RichPresence.Windows
 
             ImGui.Spacing();
             DrawTagGuideHeader();
+
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+
+            // Only show this if on Wine/Proton and AfUnix is not supported
+            if (Util.IsWine() && !AfUnixHelper.IsAfUnixSupported())
+            {
+                ImGui.Text("Wine/Proton RPC Bridge Settings");
+                ImGui.Spacing();
+
+                var useCustomPort = configuration.UseCustomRpcTcpBridgePort;
+                if (ImGui.Checkbox("Use Custom RPC TCP Bridge Port", ref useCustomPort))
+                {
+                    configuration.UseCustomRpcTcpBridgePort = useCustomPort;
+                    configuration.Save();
+                    plugin.DiscordService?.ReloadClient();
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Enables the use of a custom port for the RPC TCP Bridge. Only enable this if you have a specific reason to change the port.");
+
+                ImGui.Spacing();
+
+                using (ImRaii.Disabled(!configuration.UseCustomRpcTcpBridgePort))
+                {
+                    var tcpPort = configuration.RpcTcpBridgePort;
+                    if (ImGui.InputInt("RPC TCP Bridge Port", ref tcpPort))
+                    {
+                        // Clamp the port number to a valid range
+                        tcpPort = Math.Clamp(tcpPort, 1024, 65535);
+                        configuration.RpcTcpBridgePort = tcpPort;
+                    }
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Sets the port for the RPC TCP Bridge. Only change this if you have a specific reason to do so.");
+                    ImGui.SameLine();
+                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
+                    {
+                        configuration.Save();
+                        plugin.DiscordService?.ReloadClient();
+                    }
+                }
+
+                ImGui.Spacing();
+
+                if (ImGui.Button("Copy Binaries Folder Path"))
+                {
+                    var binaryDir = Path.Combine(Plugin.PluginInterface.AssemblyLocation.DirectoryName!,
+                        "Resources", "binaries");
+
+                    // Remove the drive letter from the path
+                    var unixPath = binaryDir[2..].Replace('\\', '/');
+                    ImGui.SetClipboardText(unixPath);
+
+                    Plugin.NotificationManager.AddNotification(new Notification
+                    {
+                        Title = "Copied Binaries Folder Path",
+                        Content = $"Copied binaries folder path to the clipboard. Paste it in your file manager/terminal and read 'setup.txt' for instructions.",
+                        Type = NotificationType.Info,
+                    });
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Copies the path to the folder containing the RPC TCP Bridge binaries for your operating system.\nIf you are using an unsupported version of Wine/Proton, you will need to run the Discord TCP Bridge from this folder.");
+            }
 
             ImGui.Spacing();
             ImGui.Separator();

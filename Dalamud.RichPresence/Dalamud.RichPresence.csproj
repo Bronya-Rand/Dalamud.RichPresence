@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/15.0.0">
     <PropertyGroup>
-		<Version>2.1.0.0</Version>
-		<Author>Bronya Rand (formerly Franz, goat)</Author>
-		<Company>Bronya Rand</Company>
-		<Name>Dalamud.RichPresence</Name>
-		<Punchline>Show your character's job, level, name, and other details in your Discord status.</Punchline>
-		<Description>Show your zone, job, level, name, and world in your Discord status.</Description>
-		<Tags>discord,rpc,social</Tags>
-		<CategoryTags>social;other</CategoryTags>
-		<PackageProjectUrl>https://github.com/Bronya-Rand/Dalamud.RichPresence</PackageProjectUrl>
-		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
-		<IsPackable>false</IsPackable>
+        <Version>2.1.0.0</Version>
+        <Author>Bronya Rand (formerly Franz, goat)</Author>
+        <Company>Bronya Rand</Company>
+        <Name>Discord Rich Presence</Name>
+        <Punchline>Show your character's job, level, name, and other details in your Discord status.</Punchline>
+        <Description>Show your zone, job, level, name, and world in your Discord status.</Description>
+        <Tags>discord,rpc,social</Tags>
+        <CategoryTags>social;other</CategoryTags>
+        <PackageProjectUrl>https://github.com/Bronya-Rand/Dalamud.RichPresence</PackageProjectUrl>
+        <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+        <IsPackable>false</IsPackable>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference GeneratePathProperty="true" Include="DiscordRichPresence" Version="1.6.1.70" />
@@ -34,8 +34,8 @@
       <None Include="Resources\binaries\**\RichPresenceBridge">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-	  <None Include="Resources\binaries\setup.txt">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
+      <None Include="Resources\binaries\setup.txt">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 </Project>

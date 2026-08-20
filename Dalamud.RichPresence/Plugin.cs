@@ -1,7 +1,5 @@
 using System;
-using System.IO;
 using Dalamud.Game.Command;
-using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -12,7 +10,6 @@ using Dalamud.RichPresence.Services;
 using Dalamud.RichPresence.Services.Discord;
 using Dalamud.RichPresence.Services.IPC;
 using Dalamud.RichPresence.Windows;
-using Dalamud.Utility;
 using DiscordRPC;
 
 namespace Dalamud.RichPresence;
@@ -30,11 +27,6 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IObjectTable ObjectTable { get; set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
     [PluginService] internal static INotificationManager NotificationManager { get; private set; } = null!;
-    #endregion
-
-    #region Binary Paths
-    private static FileInfo LinuxBinaryPath => new(Path.Combine(PluginInterface.AssemblyLocation.DirectoryName!, "Resources/binaries/linux-x64", "RichPresenceBridge"));
-    private static FileInfo MacBinaryPath => new(Path.Combine(PluginInterface.AssemblyLocation.DirectoryName!, "Resources/binaries/osx-arm64", "RichPresenceBridge"));
     #endregion
 
     #region Plugin Managers and Services
@@ -68,57 +60,35 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin()
     {
-        if (CheckBinaries())
-        {
-            // Load / create config
-            var config = PluginInterface.GetPluginConfig();
-            Configuration = Migrate.TryMigrateFromLegacyConfig(config) ?? new Configuration();
+        // Load / create config
+        var config = PluginInterface.GetPluginConfig();
+        Configuration = Migrate.TryMigrateFromLegacyConfig(config) ?? new Configuration();
 
-            // Initialize services and managers
-            LuminaService = new LuminaService(DataManager);
-            LocalizationService = new LocalizationService();
-            WaitingwayIPC = new WaitingwayIPC();
-            DiscordService = new DiscordService(Configuration);
-            CollectContext = new CollectContext(Configuration);
+        // Initialize services and managers
+        LuminaService = new LuminaService(DataManager);
+        LocalizationService = new LocalizationService();
+        WaitingwayIPC = new WaitingwayIPC();
+        DiscordService = new DiscordService(Configuration);
+        CollectContext = new CollectContext(Configuration);
 
-            ConfigWindow = new ConfigWindow(this);
+        ConfigWindow = new ConfigWindow(this);
 
-            windowSystem.AddWindow(ConfigWindow);
+        windowSystem.AddWindow(ConfigWindow);
 
-            PluginInterface.UiBuilder.Draw += windowSystem.Draw;
-            PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
+        PluginInterface.UiBuilder.Draw += windowSystem.Draw;
+        PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
 
-            SetDefaultPresence();
-            Framework.Update += UpdatePresence;
+        SetDefaultPresence();
+        Framework.Update += UpdatePresence;
 
-            ClientState.Login += OnLogin;
-            ClientState.Logout += OnLogout;
-            ClientState.TerritoryChanged += OnZoneChange;
+        ClientState.Login += OnLogin;
+        ClientState.Logout += OnLogout;
+        ClientState.TerritoryChanged += OnZoneChange;
 
-            RegisterCommand();
-            PluginInterface.LanguageChanged += ReregisterCommand;
+        RegisterCommand();
+        PluginInterface.LanguageChanged += ReregisterCommand;
 
-            Log.Info("Loaded Discord RPC");
-        }
-    }
-    private static bool CheckBinaries()
-    {
-        // Windows and Wine with AF_UNIX support do not require the TCP bridge
-        if (!Util.IsWine() || AfUnixHelper.IsAfUnixSupported())
-            return true;
-
-        if (!LinuxBinaryPath.Exists || !MacBinaryPath.Exists)
-        {
-            Log.Error("Required binaries for RichPresenceBridge are missing.");
-            NotificationManager.AddNotification(new Notification
-            {
-                Title = "Missing Binaries",
-                Content = "The required binaries for Discord RPC are missing. Please reinstall the plugin or check the installation.",
-                Type = NotificationType.Error,
-            });
-            return false;
-        }
-        return true;
+        Log.Info("Loaded Discord RPC");
     }
 
     #region Plugin Commands

@@ -1,11 +1,9 @@
 using System;
-using System.IO;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
-using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.RichPresence.Helpers;
@@ -171,27 +169,6 @@ namespace Dalamud.RichPresence.Windows
                         plugin.DiscordService?.ReloadClient();
                     }
                 }
-
-                ImGui.Spacing();
-
-                if (ImGui.Button("Copy Binaries Folder Path"))
-                {
-                    var binaryDir = Path.Combine(Plugin.PluginInterface.AssemblyLocation.DirectoryName!,
-                        "Resources", "binaries");
-
-                    // Remove the drive letter from the path
-                    var unixPath = binaryDir[2..].Replace('\\', '/');
-                    ImGui.SetClipboardText(unixPath);
-
-                    Plugin.NotificationManager.AddNotification(new Notification
-                    {
-                        Title = "Copied Binaries Folder Path",
-                        Content = $"Copied binaries folder path to the clipboard. Paste it in your file manager/terminal and read 'setup.txt' for instructions.",
-                        Type = NotificationType.Info,
-                    });
-                }
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Copies the path to the folder containing the RPC TCP Bridge binaries for your operating system.\nIf you are using an unsupported version of Wine/Proton, you will need to run the Discord TCP Bridge from this folder.");
             }
 
             ImGui.Spacing();

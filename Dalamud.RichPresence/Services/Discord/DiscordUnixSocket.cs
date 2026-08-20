@@ -1,6 +1,6 @@
 using System;
 using System.Net.Sockets;
-using Dalamud.RichPresence.Shared;
+using Dalamud.RichPresence.Helpers;
 using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Services.Discord

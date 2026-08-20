@@ -43,7 +43,7 @@ namespace Dalamud.RichPresence.Services.Discord
                             TcpBridgeNotificationShown = true;
                             Plugin.NotificationManager.AddNotification(new Notification
                             {
-                                Title = "TCP Bridge Required",
+                                Title = "RPC Bridge Required",
                                 Content = Constants.RPCTCPBridgeWarning,
                                 Type = NotificationType.Warning,
                             });

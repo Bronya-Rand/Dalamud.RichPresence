@@ -21,10 +21,5 @@ public static class Constants
         new("location",   "The current location name/content you are in/doing (e.g. New Gridania/Windurst)"),
     ];
 
-    public const string RPCTCPBridgeWarning = """
-        Discord RPC in this version of Wine/Proton requires a TCP bridge to work. Run the Discord TCP Bridge from the plugin's Resources/binaries folder
-        for your respective operating system.
-
-        For more information, see the Discord RPC forum post in #plugin-help-forum or the Discord RPC GitHub page.
-        """;
+    public const string RPCTCPBridgeWarning = "Discord RPC in this version of Wine/Proton requires you to enable the RPC Bridge in XIVLauncher to work properly. Go to XIVLauncher settings -> Game and toggle \"Enable Discord RPC Bridge\" to enable it.";
 }

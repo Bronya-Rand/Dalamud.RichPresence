@@ -30,12 +30,4 @@
     <ItemGroup>
       <PackageReference Update="DotNet.ReproducibleBuilds" Version="2.0.5" />
     </ItemGroup>
-    <ItemGroup>
-      <None Include="Resources\binaries\**\RichPresenceBridge">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-      <None Include="Resources\binaries\setup.txt">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
 </Project>

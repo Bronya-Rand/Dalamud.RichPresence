@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 
-namespace Dalamud.RichPresence.Shared
+namespace Dalamud.RichPresence.Helpers
 {
     /// <summary>
     /// A shared class between the Discord RPC Unix socket and the Discord

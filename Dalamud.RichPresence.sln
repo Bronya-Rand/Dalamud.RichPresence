@@ -4,8 +4,6 @@ VisualStudioVersion = 18.7.11919.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dalamud.RichPresence", "Dalamud.RichPresence\Dalamud.RichPresence.csproj", "{42AAB406-846E-49A2-B2E4-D1428DACB8B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RichPresenceBridge", "RichPresenceBridge\RichPresenceBridge.csproj", "{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,14 +20,6 @@ Global
 		{42AAB406-846E-49A2-B2E4-D1428DACB8B1}.Release|Any CPU.Build.0 = Release|x64
 		{42AAB406-846E-49A2-B2E4-D1428DACB8B1}.Release|x64.ActiveCfg = Release|x64
 		{42AAB406-846E-49A2-B2E4-D1428DACB8B1}.Release|x64.Build.0 = Release|x64
-		{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}.Debug|x64.Build.0 = Debug|Any CPU
-		{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}.Release|x64.ActiveCfg = Release|Any CPU
-		{A54C1169-8CE7-4041-86C7-5B00C68CEB1F}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

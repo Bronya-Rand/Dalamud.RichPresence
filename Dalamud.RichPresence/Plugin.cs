@@ -44,6 +44,7 @@ public sealed class Plugin : IDalamudPlugin
     private const string PluginCommandName = "/prp";
     private DateTime startTime = DateTime.UtcNow;
     private bool inQueue;
+    private uint? lastTerritoryId;
 
     // Discord RPC defaults
     private const string DefaultLargeImageKey = "li_1";
@@ -119,9 +120,8 @@ public sealed class Plugin : IDalamudPlugin
     {
         CollectContext.ClearCache();
         SetDefaultPresence();
-        UpdateStartTime();
     }
-    private void OnZoneChange(uint _) => UpdateStartTime();
+    private void OnZoneChange(uint territoryId) => UpdateStartTime(territoryId);
 
     #endregion
 
@@ -134,19 +134,19 @@ public sealed class Plugin : IDalamudPlugin
         DiscordService.UpdatePresenceDetails(LocalizationService.Localize("DalamudRichPresenceInMenus", LocalizationLanguage.Client));
         UpdateStartTime();
     }
-    private void UpdateStartTime()
+    private void UpdateStartTime(uint? newTerritoryId = null)
     {
-        if (Configuration.ResetTimeWhenChangingZones)
+        if (Configuration.ResetTimeWhenChangingZones && newTerritoryId != null && (newTerritoryId != lastTerritoryId || lastTerritoryId == null))
+        {
+            lastTerritoryId = newTerritoryId.Value;
             startTime = DateTime.UtcNow;
-
-        if (Configuration.DisplayDiscordTimestamp)
-            DiscordService.UpdatePresenceStartTime(startTime);
+        }
     }
     private void UpdatePresence(IFramework framework)
     {
         try
         {
-            var timestamp = Configuration.DisplayDiscordTimestamp ? new Timestamps(startTime) : null;
+            var timestamp = new Timestamps(startTime);
             var context = CollectContext;
 
             if (ObjectTable.LocalPlayer == null)

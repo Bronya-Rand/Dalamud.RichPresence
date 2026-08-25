@@ -17,7 +17,7 @@ namespace Dalamud.RichPresence.Helpers
             PlayerContext player,
             PartyContext party,
             OnlineStatusContext status,
-            Timestamps? timestamps,
+            Timestamps timestamps,
             Configuration configuration)
         {
             var loc = Plugin.LocalizationService;
@@ -48,6 +48,9 @@ namespace Dalamud.RichPresence.Helpers
             var smallImageText = ParserService.Parse(configuration.DiscordSmallImageTextField, player, party, status,
                 configuration);
 
+            // --- Timestamp (line 3) ---
+            var timestamp = configuration.DisplayDiscordTimestamp ? timestamps : new();
+
             var presence = new DiscordRPC.RichPresence
             {
                 Details = details,
@@ -59,7 +62,7 @@ namespace Dalamud.RichPresence.Helpers
                     SmallImageKey = smallImageKey,
                     SmallImageText = smallImageText,
                 },
-                Timestamps = timestamps,
+                Timestamps = timestamp,
             };
 
             // --- Party / Duty overrides State ---

@@ -27,7 +27,7 @@ namespace Dalamud.RichPresence.Helpers
         ];
 
         // Other possible locations for Discord's socket
-        private static readonly string[] TempDirEnvVars = ["TMPDIR", "TMP", "TEMP"];
+        private static readonly string[] TempDirEnvVars = ["WINE_HOST_TMPDIR", "TMPDIR", "TMP", "TEMP"];
         private bool TrySocketExists(string socketPath)
         {
             using var testSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);

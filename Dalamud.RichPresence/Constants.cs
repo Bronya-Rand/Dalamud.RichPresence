@@ -22,8 +22,12 @@ public static class Constants
     ];
 
     public const string RPCTCPBridgeWarning = """
-        Discord RPC in this version of Wine/Proton requires you to enable the RPC Bridge in XIVLauncher to work properly. 
+        A TCP bridge is required to use Discord Rich Presence on this version of Wine/Proton.
 
-        Go to XIVLauncher settings -> Game and toggle \"Enable Discord RPC Bridge\" to enable it.";
+        Enable the bridge in XIVLauncher by going to 'Settings' -> 'Game' and toggle "Enable Discord RPC Bridge".
+        If this setting is not available or does not work, you can download the bridge manually from the Releases page of DiscordRPCBridge-Wine.
         """;
+
+    public const string RPCTCPBridgeDownloadURL = "https://github.com/Bronya-Rand/DiscordRPCBridge-Wine/releases/latest";
+    public const string RPCTCPBridgeReadmeURL = "https://github.com/Bronya-Rand/DiscordRPCBridge-Wine#option-a-standalone-cli-binary-recommended-for-users";
 }

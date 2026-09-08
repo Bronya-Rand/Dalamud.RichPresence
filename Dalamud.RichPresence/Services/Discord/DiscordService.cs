@@ -1,5 +1,8 @@
 using System;
+using System.Diagnostics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.ImGuiNotification;
+using Dalamud.Interface.ImGuiNotification.EventArgs;
 using Dalamud.RichPresence.Helpers;
 using Dalamud.Utility;
 using DiscordRPC;
@@ -38,15 +41,17 @@ namespace Dalamud.RichPresence.Services.Discord
                             rpcTransport = new DiscordTcpSocket(port: configuration.RpcTcpBridgePort);
                         else
                             rpcTransport = new DiscordTcpSocket();
+
                         if (!TcpBridgeNotificationShown)
                         {
                             TcpBridgeNotificationShown = true;
-                            Plugin.NotificationManager.AddNotification(new Notification
+                            var notification = Plugin.NotificationManager.AddNotification(new Notification
                             {
                                 Title = "RPC Bridge Required",
                                 Content = Constants.RPCTCPBridgeWarning,
                                 Type = NotificationType.Warning,
                             });
+                            notification.DrawActions += NotificationActions;
                         }
                     }
                 }
@@ -108,6 +113,21 @@ namespace Dalamud.RichPresence.Services.Discord
         {
             Dispose();
             CreateClient();
+        }
+        private void NotificationActions(INotificationDrawArgs args)
+        {
+            if (ImGui.Button("Download RPC Bridge"))
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = Constants.RPCTCPBridgeDownloadURL,
+                    UseShellExecute = true
+                });
+            if (ImGui.Button("Instructions"))
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = Constants.RPCTCPBridgeReadmeURL,
+                    UseShellExecute = true
+                });
         }
     }
 }

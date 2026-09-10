@@ -45,6 +45,7 @@ public sealed class Plugin : IDalamudPlugin
     private DateTime startTime = DateTime.UtcNow;
     private bool inQueue;
     private uint? lastTerritoryId;
+    private DiscordRPC.RichPresence? lastPresence;
 
     // Discord RPC defaults
     private const string DefaultLargeImageKey = "li_1";
@@ -189,14 +190,39 @@ public sealed class Plugin : IDalamudPlugin
             );
 
             if (presence == null)
-                DiscordService.ClearPresence();
-            else
+            {
+                if (lastPresence != null)
+                {
+                    DiscordService.ClearPresence();
+                    lastPresence = null;
+                }
+                return;
+            }
+
+            if (!PresenceEquals(presence, lastPresence))
+            {
                 DiscordService.SetPresence(presence);
+                lastPresence = presence;
+            }
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error updating presence");
         }
+    }
+
+    private static bool PresenceEquals(DiscordRPC.RichPresence a, DiscordRPC.RichPresence? b)
+    {
+        if (b == null) return false;
+        return a.Details == b.Details &&
+               a.State == b.State &&
+               a.Assets?.LargeImageKey == b.Assets?.LargeImageKey &&
+               a.Assets?.LargeImageText == b.Assets?.LargeImageText &&
+               a.Assets?.SmallImageKey == b.Assets?.SmallImageKey &&
+               a.Assets?.SmallImageText == b.Assets?.SmallImageText &&
+               a.Timestamps?.Start == b.Timestamps?.Start &&
+               a.Party?.ID == b.Party?.ID &&
+               a.Party?.Size == b.Party?.Size;
     }
 
     #endregion

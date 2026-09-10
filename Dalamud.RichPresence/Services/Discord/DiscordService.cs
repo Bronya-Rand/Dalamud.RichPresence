@@ -18,6 +18,7 @@ namespace Dalamud.RichPresence.Services.Discord
 
         private DiscordRpcClient RpcClient = null!;
         private DiscordRPC.RichPresence? lastPresence;
+        private volatile bool IsFirstStart = true;
         private volatile bool TcpBridgeNotificationShown = false;
 
         public DiscordService(Configuration configuration)
@@ -58,8 +59,7 @@ namespace Dalamud.RichPresence.Services.Discord
 
                 RpcClient = new DiscordRpcClient(DiscordClientId, client: rpcTransport)
                 {
-                    SkipIdenticalPresence = true,
-                    Logger = new ConsoleLogger { Level = LogLevel.Warning }
+                    Logger = new RpcLogger { Level = LogLevel.Trace },
                 };
                 RpcClient.OnReady += (sender, e) =>
                 {
@@ -67,13 +67,16 @@ namespace Dalamud.RichPresence.Services.Discord
 
                     // Re-send the last presence on reconnect so the new Discord
                     // client immediately shows current game status.
-                    if (lastPresence != null)
+                    if (lastPresence != null && !IsFirstStart)
                     {
                         Plugin.Log.Info("Re-sending presence after reconnect.");
                         RpcClient.SetPresence(lastPresence);
                     }
+
+                    if (IsFirstStart)
+                        IsFirstStart = false;
                 };
-                RpcClient.OnPresenceUpdate += (sender, e) => { Plugin.Log.Debug($"Received Presence Update: {e.Presence}"); };
+                RpcClient.OnPresenceUpdate += (sender, e) => { Plugin.Log.Verbose($"Received Presence Update"); };
             }
 
             if (!RpcClient.IsInitialized)

@@ -7,6 +7,7 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.RichPresence.Services;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Info;
 
 namespace Dalamud.RichPresence.Helpers
@@ -45,6 +46,7 @@ namespace Dalamud.RichPresence.Helpers
     /// <param name="TerritoryName">The name of the territory the player is in</param>
     /// <param name="TerritoryLoadingImageId">The loading ID image of the region used for large images</param>
     /// <param name="WardId">The ward ID of the player's current residential area</param>
+    /// <param name="InstanceId">The instance ID of the player's current instance</param>
     /// <param name="ClassJobId">The ID of the player's current class</param>
     /// <param name="ClassJob">The string of the player's current class</param>
     /// <param name="ClassJobAbbreviation">The 3 letter abbreviation of the player's current class</param>
@@ -55,7 +57,7 @@ namespace Dalamud.RichPresence.Helpers
         uint HomeWorldId, string HomeWorld,
         bool IsOnHomeWorld,
         string DataCenterName,
-        string TerritoryName, uint TerritoryLoadingImageId, sbyte WardId,
+        string TerritoryName, uint TerritoryLoadingImageId, sbyte WardId, uint InstanceId,
         uint ClassJobId, string ClassJob, string ClassJobAbbreviation, int Level);
     internal class CollectContext(Configuration configuration)
     {
@@ -158,7 +160,7 @@ namespace Dalamud.RichPresence.Helpers
         public unsafe PlayerContext GetPlayerStatus()
         {
             if (Plugin.ObjectTable.LocalPlayer == null)
-                return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false, string.Empty, string.Empty, 0, -1, 0, string.Empty, string.Empty, -1);
+                return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false, string.Empty, string.Empty, 0, -1, 0, 0, string.Empty, string.Empty, -1);
 
             var localPlayer = Plugin.ObjectTable.LocalPlayer;
             var fcTag = localPlayer.CompanyTag.TextValue;
@@ -188,6 +190,8 @@ namespace Dalamud.RichPresence.Helpers
                 else
                     territoryName = $"Unknown Territory {territoryId}";
             }
+            var uiState = UIState.Instance();
+            var instanceId = uiState->PublicInstance.InstanceId;
 
             var currentWorldId = localPlayer.CurrentWorld.RowId;
             var currentWorld = localPlayer.CurrentWorld.Value.Name.ExtractText();
@@ -209,6 +213,7 @@ namespace Dalamud.RichPresence.Helpers
                 TerritoryName: territoryName,
                 TerritoryLoadingImageId: territoryLoadingImageId,
                 WardId: wardId,
+                InstanceId: instanceId,
                 ClassJobId: localPlayer.ClassJob.RowId,
                 ClassJob: textInfo.ToTitleCase(classJob),
                 ClassJobAbbreviation: localPlayer.ClassJob.Value.Abbreviation.ExtractText(),

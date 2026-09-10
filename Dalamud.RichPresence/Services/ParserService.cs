@@ -16,6 +16,7 @@ public static partial class ParserService
         "level",
         "location",
         "ward",
+        "instance",
         "fc",
         "homeworld",
         "status"
@@ -62,6 +63,7 @@ public static partial class ParserService
             "level" => "100",
             "location" => player.TerritoryName,
             "ward" => string.Empty,
+            "instance" => "99",
             "fc" => "\u00abFFXIV\u00bb",
             "homeworld" => "Hydaleyn",
             "status" => status.StatusName,
@@ -74,6 +76,7 @@ public static partial class ParserService
             "level" => player.Level > 0 ? player.Level.ToString() : string.Empty,
             "location" => player.TerritoryName,
             "ward" => player.WardId > -1 ? $"Ward {player.WardId + 1}" : string.Empty,
+            "instance" => player.InstanceId > 0 ? $"{player.InstanceId}" : string.Empty,
             "fc" => player.FcTag.IsNullOrEmpty() ? string.Empty : $"\u00ab{player.FcTag}\u00bb",
             "homeworld" => player.HomeWorld,
             "status" => status.StatusName,

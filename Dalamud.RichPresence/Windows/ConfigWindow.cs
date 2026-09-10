@@ -62,6 +62,7 @@ namespace Dalamud.RichPresence.Windows
                     TerritoryName: "Limsa Lominsa Lower Decks",
                     TerritoryLoadingImageId: 1,
                     WardId: 0,
+                    InstanceId: 0,
                     ClassJobId: 0,
                     ClassJob: "Black Mage",
                     ClassJobAbbreviation: "BLM",

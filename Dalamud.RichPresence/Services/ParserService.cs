@@ -47,11 +47,10 @@ public static partial class ParserService
     /// </summary>
     /// <param name="tag">The tag to resolve.</param>
     /// <param name="player">Player Information</param>
-    /// <param name="party">Party Information</param>
     /// <param name="status">Online Status Info</param>
     /// <param name="config">Config Settings</param>
     /// <returns></returns>
-    private static string Resolve(string tag, PlayerContext player, PartyContext party, OnlineStatusContext status, Configuration config)
+    private static string Resolve(string tag, PlayerContext player, OnlineStatusContext status, Configuration config)
     {
         return tag.ToLowerInvariant() switch
         {
@@ -90,11 +89,10 @@ public static partial class ParserService
     /// </summary>
     /// <param name="input">The string of data to parse in</param>
     /// <param name="player">Player Information</param>
-    /// <param name="party">Party Information</param>
     /// <param name="status">Online Status Info</param>
     /// <param name="config">Config Settings</param>
     /// <returns></returns>
-    public static string Parse(string input, PlayerContext player, PartyContext party, OnlineStatusContext status, Configuration config)
+    public static string Parse(string input, PlayerContext player, OnlineStatusContext status, Configuration config)
     {
         if (string.IsNullOrEmpty(input)) return input;
 
@@ -103,7 +101,7 @@ public static partial class ParserService
         return compiledRegex.Replace(input, match =>
         {
             var tag = match.Groups[1].Value.ToLowerInvariant();
-            return AcceptedTags.Contains(tag) ? Resolve(tag, player, party, status, config) : match.Value;
+            return AcceptedTags.Contains(tag) ? Resolve(tag, player, status, config) : match.Value;
         });
     }
 

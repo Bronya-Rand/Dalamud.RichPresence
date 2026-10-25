@@ -24,7 +24,6 @@ namespace Dalamud.RichPresence.Windows
 
         // For showing a live preview of what gets sent to Discord.
         private PlayerContext previewPlayer;
-        private PartyContext previewParty;
         private OnlineStatusContext previewStatus;
 
         public ConfigWindow(Plugin plugin) :
@@ -45,7 +44,6 @@ namespace Dalamud.RichPresence.Windows
             if (Plugin.ObjectTable.LocalPlayer != null)
             {
                 previewPlayer = plugin.CollectContext.GetPlayerStatus();
-                previewParty = plugin.CollectContext.GetPartyStatus();
                 previewStatus = CollectContext.OnlineStatus;
             }
             else
@@ -68,16 +66,7 @@ namespace Dalamud.RichPresence.Windows
                     ClassJobAbbreviation: "BLM",
                     Level: 100
                 );
-
-                previewParty = new PartyContext(
-                    InParty: true,
-                    InDuty: false,
-                    IsPartyCrossRealm: false,
-                    PartySize: 4,
-                    PartyMaxSize: 8,
-                    HashedPartyId: "mock-party-id"
-                );
-
+                
                 previewStatus = new OnlineStatusContext(
                     IsAfk: false,
                     WatchingCutscene: false,
@@ -145,7 +134,7 @@ namespace Dalamud.RichPresence.Windows
                 {
                     configuration.UseCustomRpcTcpBridgePort = useCustomPort;
                     configuration.Save();
-                    plugin.DiscordService?.ReloadClient();
+                    plugin.DiscordService.ReloadClient();
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Enables the use of a custom port for the RPC TCP Bridge. Only enable this if you have a specific reason to change the port.");
@@ -167,7 +156,7 @@ namespace Dalamud.RichPresence.Windows
                     if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
                     {
                         configuration.Save();
-                        plugin.DiscordService?.ReloadClient();
+                        plugin.DiscordService.ReloadClient();
                     }
                 }
             }
@@ -325,12 +314,15 @@ namespace Dalamud.RichPresence.Windows
                 ImGui.Text(label);
 
                 // Preview the result of the template parsing
-                var previewText = ParserService.Parse(draft, previewPlayer, previewParty, previewStatus, configuration);
+                var previewText = ParserService.Parse(draft, previewPlayer, previewStatus, configuration);
                 ImGui.TextColored(ImGuiColors.DalamudGrey, previewText);
                 ImGui.Spacing();
             }
         }
 
-        public void Dispose() => GC.SuppressFinalize(this);
+        public void Dispose()
+        {
+            
+        }
     }
 }

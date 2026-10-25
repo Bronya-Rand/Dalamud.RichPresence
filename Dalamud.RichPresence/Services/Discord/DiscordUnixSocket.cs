@@ -33,25 +33,24 @@ namespace Dalamud.RichPresence.Services.Discord
                     for (var i = 0; i < 10; i++)
                     {
                         var discordSocketPath = socketResolver.FindSocket(i);
-                        if (!discordSocketPath.IsNullOrEmpty())
-                        {
-                            socketPath = discordSocketPath;
-                            connectedPipe = i;
-                            break;
-                        }
+                        if (discordSocketPath.IsNullOrEmpty()) continue;
+                        
+                        socketPath = discordSocketPath;
+                        ConnectedPipe = i;
+                        break;
                     }
                 }
                 else
                 {
                     // Use the specified pipe number
                     socketPath = socketResolver.FindSocket(pipe);
-                    connectedPipe = pipe;
+                    ConnectedPipe = pipe;
                 }
                 if (socketPath.IsNullOrEmpty())
                     return false;
 
                 // Create socket
-                Plugin.Log.Info($"Attempting to connect to Discord socket at {socketPath} (pipe {connectedPipe})");
+                Plugin.Log.Info($"Attempting to connect to Discord socket at {socketPath} (pipe {ConnectedPipe})");
                 socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
                 socket.Connect(new UnixDomainSocketEndPoint(socketPath));
 
@@ -72,7 +71,7 @@ namespace Dalamud.RichPresence.Services.Discord
             socket?.Dispose();
             socket = null;
             socketPath = null;
-            connectedPipe = -1;
+            ConnectedPipe = -1;
         }
     }
 }

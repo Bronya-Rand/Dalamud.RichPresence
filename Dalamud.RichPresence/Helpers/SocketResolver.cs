@@ -34,7 +34,12 @@ namespace Dalamud.RichPresence.Helpers
             try
             {
                 testSocket.Connect(new UnixDomainSocketEndPoint(socketPath));
-                try { testSocket.Shutdown(SocketShutdown.Both); } catch { }
+                try { testSocket.Shutdown(SocketShutdown.Both); }
+                catch
+                {
+                    // ignored
+                }
+
                 return true;
 
             }
@@ -53,16 +58,16 @@ namespace Dalamud.RichPresence.Helpers
         /// Resolves the base directory for where the Discord socket would be located.
         /// </summary>
         /// <returns>The base directory for the runtime.</returns>
-        public static string ResolveRuntimeBaseDir()
+        private static string ResolveRuntimeBaseDir()
         {
             // Check both instances of XDG_RUNTIME_DIR
             var xdgRuntimeDir = Environment.GetEnvironmentVariable("XDG_RUNTIME_DIR");
             if (!string.IsNullOrEmpty(xdgRuntimeDir))
                 return xdgRuntimeDir;
 
-            var wineHostXDGRuntimeDir = Environment.GetEnvironmentVariable("WINE_HOST_XDG_RUNTIME_DIR");
-            if (!string.IsNullOrEmpty(wineHostXDGRuntimeDir))
-                return wineHostXDGRuntimeDir;
+            var wineHostXdgRuntimeDir = Environment.GetEnvironmentVariable("WINE_HOST_XDG_RUNTIME_DIR");
+            if (!string.IsNullOrEmpty(wineHostXdgRuntimeDir))
+                return wineHostXdgRuntimeDir;
 
             // Test fallback environment variables for temp directories
             foreach (var envVar in TempDirEnvVars)

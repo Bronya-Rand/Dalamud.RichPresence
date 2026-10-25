@@ -4,7 +4,7 @@ using Dalamud.Plugin.Ipc.Exceptions;
 
 namespace Dalamud.RichPresence.Services.IPC
 {
-    internal class WaitingwayIPC : IDisposable
+    internal class WaitingwayIpc : IDisposable
     {
         // Waitingway IPCs
         private readonly ICallGateSubscriber<int?> wwQueueType = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.QueueType");

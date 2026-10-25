@@ -8,12 +8,12 @@ namespace Dalamud.RichPresence.Services.Discord
     internal abstract class DiscordUnixStream : INamedPipeClient
     {
         protected NetworkStream? Stream;
-        protected int connectedPipe = -1;
 
         public ILogger Logger { get; set; } = null!;
-        public int ConnectedPipe => connectedPipe;
+        public int ConnectedPipe { get; protected set; } = -1;
+
         public virtual bool IsConnected => GetIsConnected();
-        protected virtual bool HasFullHeaderAvailable() => Stream?.Socket.Available >= 8;
+        private bool HasFullHeaderAvailable() => Stream?.Socket.Available >= 8;
         public abstract bool Connect(int pipe);
         public abstract void Dispose();
         public void Close() => Dispose();
@@ -28,17 +28,17 @@ namespace Dalamud.RichPresence.Services.Discord
                 if (!HasFullHeaderAvailable()) return false;
 
                 // Read header (8 bytes: 4 bytes opcode, 4 bytes length)
-                byte[] header = new byte[8];
-                int bytesRead = 0;
+                var header = new byte[8];
+                var bytesRead = 0;
                 while (bytesRead < 8)
                 {
-                    int read = Stream.Read(header, bytesRead, 8 - bytesRead);
+                    var read = Stream.Read(header, bytesRead, 8 - bytesRead);
                     if (read == 0) return false; // Connection closed
                     bytesRead += read;
                 }
 
-                uint opVal = BitConverter.ToUInt32(header, 0);
-                uint length = BitConverter.ToUInt32(header, 4);
+                var opVal = BitConverter.ToUInt32(header, 0);
+                var length = BitConverter.ToUInt32(header, 4);
 
                 // Validate length
                 if (length > PipeFrame.MAX_SIZE)
@@ -48,11 +48,11 @@ namespace Dalamud.RichPresence.Services.Discord
                 }
 
                 // Read payload
-                byte[] data = new byte[length];
+                var data = new byte[length];
                 bytesRead = 0;
                 while (bytesRead < length)
                 {
-                    int read = Stream.Read(data, bytesRead, (int)length - bytesRead);
+                    var read = Stream.Read(data, bytesRead, (int)length - bytesRead);
                     if (read == 0) return false; // Connection closed
                     bytesRead += read;
                 }
@@ -83,14 +83,14 @@ namespace Dalamud.RichPresence.Services.Discord
 
             try
             {
-                byte[] buffer = new byte[8 + frame.Data.Length];
+                var buffer = new byte[8 + frame.Data.Length];
 
                 // Write opcode (4 byte uint)
-                byte[] opcodeBytes = BitConverter.GetBytes((uint)frame.Opcode);
+                var opcodeBytes = BitConverter.GetBytes((uint)frame.Opcode);
                 Buffer.BlockCopy(opcodeBytes, 0, buffer, 0, 4);
 
                 // Write data length (4 byte)
-                byte[] lengthBytes = BitConverter.GetBytes(frame.Length);
+                var lengthBytes = BitConverter.GetBytes(frame.Length);
                 Buffer.BlockCopy(lengthBytes, 0, buffer, 4, 4);
 
                 // Write data
@@ -115,18 +115,16 @@ namespace Dalamud.RichPresence.Services.Discord
 
             try
             {
-                if (socket.Poll(0, SelectMode.SelectRead) && socket.Available == 0)
-                {
-                    if (connectedPipe >= 0)
-                        Plugin.Log.Info($"Discord connection (pipe {connectedPipe}) disconnected (remote close detected).");
-                    connectedPipe = -1;
-                    return false;
-                }
-                return true;
+                if (!socket.Poll(0, SelectMode.SelectRead) || socket.Available != 0) return true;
+                if (ConnectedPipe >= 0)
+                    Plugin.Log.Info($"Discord connection (pipe {ConnectedPipe}) disconnected (remote close detected).");
+                
+                ConnectedPipe = -1;
+                return false;
             }
             catch (SocketException ex)
             {
-                Plugin.Log.Error(ex, $"Error checking Discord connection (pipe {connectedPipe})");
+                Plugin.Log.Error(ex, $"Error checking Discord connection (pipe {ConnectedPipe})");
                 return false;
             }
         }

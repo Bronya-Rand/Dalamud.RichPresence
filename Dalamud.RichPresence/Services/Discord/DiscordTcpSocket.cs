@@ -3,17 +3,10 @@ using System.Net.Sockets;
 
 namespace Dalamud.RichPresence.Services.Discord
 {
-    internal class DiscordTcpSocket : DiscordUnixStream
+    internal class DiscordTcpSocket(string host = "localhost", int port = 2026) : DiscordUnixStream
     {
-        private readonly string host;
         private TcpClient? client;
-        public int Port { get; set; }
-
-        public DiscordTcpSocket(string host = "localhost", int port = 2026)
-        {
-            this.host = host;
-            Port = port;
-        }
+        private int Port { get; } = port;
 
         public override bool Connect(int pipe)
         {
@@ -25,7 +18,7 @@ namespace Dalamud.RichPresence.Services.Discord
                 client = new TcpClient();
                 client.Connect(host, Port);
                 Stream = client.GetStream();
-                connectedPipe = pipe >= 0 ? pipe : 0;
+                ConnectedPipe = pipe >= 0 ? pipe : 0;
 
                 Plugin.Log.Info($"Connected to Discord TCP bridge at {host}:{Port}");
                 return true;
@@ -46,7 +39,7 @@ namespace Dalamud.RichPresence.Services.Discord
             client?.Dispose();
             client = null;
 
-            connectedPipe = -1;
+            ConnectedPipe = -1;
         }
     }
 }

@@ -30,26 +30,26 @@ namespace Dalamud.RichPresence.Helpers
                 return null;
 
             // --- Details (line 1) ---
-            var details = ParserService.Parse(configuration.DiscordDetailField, player, party, status, configuration);
+            var details = ParserService.Parse(configuration.DiscordDetailField, player, status, configuration);
 
             // --- State (line 2) — lowest-priority default, overwritten by duty/AFK below ---
-            var state = ParserService.Parse(configuration.DiscordStateField, player, party, status, configuration);
+            var state = ParserService.Parse(configuration.DiscordStateField, player, status, configuration);
 
             // --- Images ---
             var largeImageKey = player.TerritoryLoadingImageId != 0
                 ? $"li_{player.TerritoryLoadingImageId}"
                 : DefaultLargeImageKey;
-            var largeImageText = ParserService.Parse(configuration.DiscordLargeImageTextField, player, party, status,
+            var largeImageText = ParserService.Parse(configuration.DiscordLargeImageTextField, player, status,
                 configuration);
 
             var smallImageKey = configuration.ShowJobIcon
                 ? $"class_{player.ClassJobId}"
                 : DefaultSmallImageKey;
-            var smallImageText = ParserService.Parse(configuration.DiscordSmallImageTextField, player, party, status,
+            var smallImageText = ParserService.Parse(configuration.DiscordSmallImageTextField, player, status,
                 configuration);
 
             // --- Timestamp (line 3) ---
-            var timestamp = configuration.DisplayDiscordTimestamp ? timestamps : new();
+            var timestamp = configuration.DisplayDiscordTimestamp ? timestamps : new Timestamps();
 
             var presence = new DiscordRPC.RichPresence
             {

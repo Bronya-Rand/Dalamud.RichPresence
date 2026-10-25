@@ -5,29 +5,29 @@ namespace Dalamud.RichPresence.Helpers
 {
     internal static class AfUnixHelper
     {
-        private static bool? AFUnixSupported;
+        private static bool? _afUnixSupported;
 
         public static bool IsAfUnixSupported()
         {
-            if (AFUnixSupported.HasValue) return AFUnixSupported.Value;
+            if (_afUnixSupported.HasValue) return _afUnixSupported.Value;
 
             try
             {
                 using var probe = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
-                AFUnixSupported = true;
+                _afUnixSupported = true;
             }
             catch (SocketException)
             {
                 Plugin.Log.Warning("AF_UNIX is not supported on this platform.");
-                AFUnixSupported = false;
+                _afUnixSupported = false;
             }
             catch (Exception ex)
             {
                 Plugin.Log.Warning(ex, "AF_UNIX probe failed");
-                AFUnixSupported = false;
+                _afUnixSupported = false;
             }
 
-            return AFUnixSupported.Value;
+            return _afUnixSupported.Value;
         }
     }
 }

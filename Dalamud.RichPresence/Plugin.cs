@@ -39,7 +39,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     internal DiscordService DiscordService { get; private set; } = null!;
     internal CollectContext CollectContext { get; private set; } = null!;
     internal static LocalizationService LocalizationService { get; private set; } = null!;
-    internal static WaitingwayIPC WaitingwayIpc { get; private set; } = null!;
+    internal static WaitingwayIpc WaitingwayIpc { get; private set; } = null!;
     #endregion
 
     #region Initialization Variables
@@ -73,7 +73,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         // Initialize services and managers
         LuminaService = new LuminaService(DataManager);
         LocalizationService = new LocalizationService();
-        WaitingwayIpc = new WaitingwayIPC();
+        WaitingwayIpc = new WaitingwayIpc();
         DiscordService = new DiscordService(Configuration);
         CollectContext = new CollectContext(Configuration);
 

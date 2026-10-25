@@ -16,10 +16,10 @@ namespace Dalamud.RichPresence.Services.Discord
         private readonly Configuration configuration;
         private const string DiscordClientId = "478143453536976896";
 
-        private DiscordRpcClient RpcClient = null!;
+        private DiscordRpcClient rpcClient = null!;
         private DiscordRPC.RichPresence? lastPresence;
-        private volatile bool IsFirstStart = true;
-        private volatile bool TcpBridgeNotificationShown = false;
+        private volatile bool isFirstStart = true;
+        private volatile bool tcpBridgeNotificationShown;
 
         public DiscordService(Configuration configuration)
         {
@@ -29,7 +29,7 @@ namespace Dalamud.RichPresence.Services.Discord
 
         private void CreateClient()
         {
-            if (RpcClient == null || RpcClient.IsDisposed)
+            if (rpcClient.IsDisposed)
             {
                 INamedPipeClient? rpcTransport = null;
                 if (Util.IsWine())
@@ -38,18 +38,17 @@ namespace Dalamud.RichPresence.Services.Discord
                         rpcTransport = new DiscordUnixSocket();
                     else
                     {
-                        if (configuration.UseCustomRpcTcpBridgePort)
-                            rpcTransport = new DiscordTcpSocket(port: configuration.RpcTcpBridgePort);
-                        else
-                            rpcTransport = new DiscordTcpSocket();
+                        rpcTransport = configuration.UseCustomRpcTcpBridgePort ? 
+                            new DiscordTcpSocket(port: configuration.RpcTcpBridgePort) 
+                            : new DiscordTcpSocket();
 
-                        if (!TcpBridgeNotificationShown)
+                        if (!tcpBridgeNotificationShown)
                         {
-                            TcpBridgeNotificationShown = true;
+                            tcpBridgeNotificationShown = true;
                             var notification = Plugin.NotificationManager.AddNotification(new Notification
                             {
                                 Title = "RPC Bridge Required",
-                                Content = Constants.RPCTCPBridgeWarning,
+                                Content = Constants.RpctcpBridgeWarning,
                                 Type = NotificationType.Warning,
                             });
                             notification.DrawActions += NotificationActions;
@@ -57,61 +56,54 @@ namespace Dalamud.RichPresence.Services.Discord
                     }
                 }
 
-                RpcClient = new DiscordRpcClient(DiscordClientId, client: rpcTransport)
+                rpcClient = new DiscordRpcClient(DiscordClientId, client: rpcTransport)
                 {
                     Logger = new RpcLogger { Level = LogLevel.Trace },
                 };
-                RpcClient.OnReady += (sender, e) =>
+                rpcClient.OnReady += (_, e) =>
                 {
                     Plugin.Log.Info($"Discord RPC ready: {e.User?.Username}");
 
                     // Re-send the last presence on reconnect so the new Discord
                     // client immediately shows current game status.
-                    if (lastPresence != null && !IsFirstStart)
+                    if (lastPresence != null && !isFirstStart)
                     {
                         Plugin.Log.Info("Re-sending presence after reconnect.");
-                        RpcClient.SetPresence(lastPresence);
+                        rpcClient.SetPresence(lastPresence);
                     }
 
-                    if (IsFirstStart)
-                        IsFirstStart = false;
+                    if (isFirstStart)
+                        isFirstStart = false;
                 };
-                RpcClient.OnPresenceUpdate += (sender, e) => { Plugin.Log.Verbose($"Received Presence Update"); };
+                rpcClient.OnPresenceUpdate += (_, _) => { Plugin.Log.Verbose($"Received Presence Update"); };
             }
 
-            if (!RpcClient.IsInitialized)
-                RpcClient.Initialize();
+            if (!rpcClient.IsInitialized)
+                rpcClient.Initialize();
         }
         public void SetPresence(DiscordRPC.RichPresence presence)
         {
             CreateClient();
-            if (RpcClient == null) return;
             lastPresence = presence;
-            RpcClient.SetPresence(presence);
+            rpcClient.SetPresence(presence);
         }
         public void ClearPresence()
         {
             CreateClient();
-            if (RpcClient == null) return;
-            RpcClient.ClearPresence();
+            rpcClient.ClearPresence();
         }
         public void UpdatePresenceDetails(string details)
         {
             CreateClient();
-            if (RpcClient == null) return;
-            RpcClient.UpdateDetails(details);
+            rpcClient.UpdateDetails(details);
         }
         public void UpdatePresenceStartTime(DateTime startTime)
         {
             CreateClient();
-            if (RpcClient == null) return;
-            RpcClient.UpdateStartTime(startTime);
+            rpcClient.UpdateStartTime(startTime);
         }
-        public void Dispose()
-        {
-            if (RpcClient == null) return;
-            RpcClient.Dispose();
-        }
+        public void Dispose() => rpcClient.Dispose();
+
         public void ReloadClient()
         {
             Dispose();
@@ -122,13 +114,13 @@ namespace Dalamud.RichPresence.Services.Discord
             if (ImGui.Button("Download RPC Bridge"))
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = Constants.RPCTCPBridgeDownloadURL,
+                    FileName = Constants.RpctcpBridgeDownloadUrl,
                     UseShellExecute = true
                 });
             if (ImGui.Button("Instructions"))
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = Constants.RPCTCPBridgeReadmeURL,
+                    FileName = Constants.RpctcpBridgeReadmeUrl,
                     UseShellExecute = true
                 });
         }

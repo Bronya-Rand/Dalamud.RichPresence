@@ -22,13 +22,13 @@ public static class Constants
         new("location",   "The current location name/content you are in/doing (e.g. New Gridania/Windurst)"),
     ];
 
-    public const string RPCTCPBridgeWarning = """
+    public const string RpctcpBridgeWarning = """
         A TCP bridge is required to use Discord Rich Presence on this version of Wine/Proton.
 
         Enable the bridge in XIVLauncher by going to 'Settings' -> 'Game' and toggle "Enable Discord RPC Bridge".
         If this setting is not available or does not work, you can download the bridge manually from the Releases page of DiscordRPCBridge-Wine.
         """;
 
-    public const string RPCTCPBridgeDownloadURL = "https://github.com/Bronya-Rand/DiscordRPCBridge-Wine/releases/latest";
-    public const string RPCTCPBridgeReadmeURL = "https://github.com/Bronya-Rand/DiscordRPCBridge-Wine#option-a-standalone-cli-binary-recommended-for-users";
+    public const string RpctcpBridgeDownloadUrl = "https://github.com/Bronya-Rand/DiscordRPCBridge-Wine/releases/latest";
+    public const string RpctcpBridgeReadmeUrl = "https://github.com/Bronya-Rand/DiscordRPCBridge-Wine#option-a-standalone-cli-binary-recommended-for-users";
 }

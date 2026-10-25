@@ -56,16 +56,13 @@ public class Configuration : IPluginConfiguration
     /// <summary>
     /// Determines whether to hide info whilst AFK.
     /// </summary>
-    public bool HideEntirelyWhenAfk = false;
+    public bool HideEntirelyWhenAfk;
 
     /// <summary>
     /// Determines whether to hide info whilst in a cutscene.
     /// </summary>
-    public bool HideInCutscene = false;
-    public bool UseCustomRpcTcpBridgePort = false;
+    public bool HideInCutscene;
+    public bool UseCustomRpcTcpBridgePort;
     public int RpcTcpBridgePort = 2026;
-    public void Save()
-    {
-        Plugin.PluginInterface.SavePluginConfig(this);
-    }
+    public void Save() => Plugin.PluginInterface.SavePluginConfig(this);
 }

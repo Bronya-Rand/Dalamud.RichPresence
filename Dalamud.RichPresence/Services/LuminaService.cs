@@ -13,7 +13,6 @@ namespace Dalamud.RichPresence.Services
 
         private readonly ExcelSheet<World> worlds;
         private readonly ExcelSheet<TerritoryType> territoryTypes;
-        private readonly ExcelSheet<OnlineStatus> onlineStatus;
         private readonly ExcelSheet<ContentFinderCondition> contentFinderConditions;
 
         public LuminaService(IDataManager dataManager)
@@ -24,7 +23,6 @@ namespace Dalamud.RichPresence.Services
             // TODO: Add settings to control language of these sheets
             worlds = DataManager.GetExcelSheet<World>();
             territoryTypes = DataManager.GetExcelSheet<TerritoryType>();
-            onlineStatus = DataManager.GetExcelSheet<OnlineStatus>();
             contentFinderConditions = DataManager.GetExcelSheet<ContentFinderCondition>();
         }
         public string GetWorldName(uint worldId) =>

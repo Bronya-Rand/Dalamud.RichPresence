@@ -7,9 +7,14 @@ namespace Dalamud.RichPresence.Services.IPC
     internal class WaitingwayIpc : IDisposable
     {
         // Waitingway IPCs
-        private readonly ICallGateSubscriber<int?> wwQueueType = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.QueueType");
-        private readonly ICallGateSubscriber<int?> wwCurrentPosition = Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.CurrentPosition");
-        private readonly ICallGateSubscriber<TimeSpan?> wwEstimatedTimeRemaining = Plugin.PluginInterface.GetIpcSubscriber<TimeSpan?>("Waitingway.EstimatedTimeRemaining");
+        private readonly ICallGateSubscriber<int?> wwQueueType =
+            Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.QueueType");
+
+        private readonly ICallGateSubscriber<int?> wwCurrentPosition =
+            Plugin.PluginInterface.GetIpcSubscriber<int?>("Waitingway.CurrentPosition");
+
+        private readonly ICallGateSubscriber<TimeSpan?> wwEstimatedTimeRemaining =
+            Plugin.PluginInterface.GetIpcSubscriber<TimeSpan?>("Waitingway.EstimatedTimeRemaining");
 
         public bool IsInLoginQueue()
         {
@@ -23,6 +28,7 @@ namespace Dalamud.RichPresence.Services.IPC
                 return false;
             }
         }
+
         public int GetQueuePosition()
         {
             try
@@ -34,6 +40,7 @@ namespace Dalamud.RichPresence.Services.IPC
                 return -1;
             }
         }
+
         public TimeSpan? GetQueueEstimate()
         {
             try
@@ -45,6 +52,7 @@ namespace Dalamud.RichPresence.Services.IPC
                 return null;
             }
         }
+
         public void Dispose() => GC.SuppressFinalize(this);
     }
 }

@@ -13,6 +13,7 @@ namespace Dalamud.RichPresence.Helpers
         public Action<string>? LogCallback;
         public Action<string>? LogDebugCallback;
         public Action<Exception?, string>? LogErrorCallback;
+
         private static readonly string[] SandboxSubdirectories =
         [
             "", // Native
@@ -28,20 +29,23 @@ namespace Dalamud.RichPresence.Helpers
 
         // Other possible locations for Discord's socket
         private static readonly string[] TempDirEnvVars = ["WINE_HOST_TMPDIR", "TMPDIR", "TMP", "TEMP"];
+
         private bool TrySocketExists(string socketPath)
         {
             using var testSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
             try
             {
                 testSocket.Connect(new UnixDomainSocketEndPoint(socketPath));
-                try { testSocket.Shutdown(SocketShutdown.Both); }
+                try
+                {
+                    testSocket.Shutdown(SocketShutdown.Both);
+                }
                 catch
                 {
                     // ignored
                 }
 
                 return true;
-
             }
             catch (SocketException)
             {

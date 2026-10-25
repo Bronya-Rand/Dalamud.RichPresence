@@ -23,6 +23,7 @@ namespace Dalamud.RichPresence.Services.Discord
                 LogDebugCallback = message => Plugin.Log.Debug(message)
             };
         }
+
         public override bool Connect(int pipe)
         {
             try
@@ -34,7 +35,7 @@ namespace Dalamud.RichPresence.Services.Discord
                     {
                         var discordSocketPath = socketResolver.FindSocket(i);
                         if (discordSocketPath.IsNullOrEmpty()) continue;
-                        
+
                         socketPath = discordSocketPath;
                         ConnectedPipe = i;
                         break;
@@ -46,6 +47,7 @@ namespace Dalamud.RichPresence.Services.Discord
                     socketPath = socketResolver.FindSocket(pipe);
                     ConnectedPipe = pipe;
                 }
+
                 if (socketPath.IsNullOrEmpty())
                     return false;
 

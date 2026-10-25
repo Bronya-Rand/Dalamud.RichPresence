@@ -19,6 +19,7 @@ namespace Dalamud.RichPresence;
 public sealed class Plugin : IAsyncDalamudPlugin
 {
     #region Dalamud Services
+
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     [PluginService] private static ICommandManager CommandManager { get; set; } = null!;
@@ -29,9 +30,11 @@ public sealed class Plugin : IAsyncDalamudPlugin
     [PluginService] internal static IObjectTable ObjectTable { get; set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
     [PluginService] internal static INotificationManager NotificationManager { get; private set; } = null!;
+
     #endregion
 
     #region Plugin Managers and Services
+
     public Configuration Configuration { get; private set; } = null!;
     private readonly WindowSystem windowSystem = new("RichPresence");
     private ConfigWindow ConfigWindow { get; set; } = null!;
@@ -40,9 +43,11 @@ public sealed class Plugin : IAsyncDalamudPlugin
     internal CollectContext CollectContext { get; private set; } = null!;
     internal static LocalizationService LocalizationService { get; private set; } = null!;
     internal static WaitingwayIpc WaitingwayIpc { get; private set; } = null!;
+
     #endregion
 
     #region Initialization Variables
+
     private const string PluginCommandName = "/prp";
     private DateTime startTime = DateTime.UtcNow;
     private bool inQueue;
@@ -52,6 +57,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     // Discord RPC defaults
     private const string DefaultLargeImageKey = "li_1";
     private const string DefaultSmallImageKey = "class_0";
+
     private static readonly DiscordRPC.RichPresence DefaultPresence = new()
     {
         Assets = new Assets
@@ -60,12 +66,13 @@ public sealed class Plugin : IAsyncDalamudPlugin
             SmallImageKey = DefaultSmallImageKey,
         },
     };
+
     #endregion
 
     public Task LoadAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        
+
         // Load / create config
         var config = PluginInterface.GetPluginConfig();
         Configuration = Migrate.TryMigrateFromLegacyConfig(config) ?? new Configuration();
@@ -98,6 +105,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     }
 
     #region Plugin Commands
+
     private void RegisterCommand()
     {
         CommandManager.AddHandler(PluginCommandName, new CommandInfo(OnCommand)
@@ -106,12 +114,15 @@ public sealed class Plugin : IAsyncDalamudPlugin
             ShowInHelp = true,
         });
     }
+
     private static void UnregisterCommand() => CommandManager.RemoveHandler(PluginCommandName);
+
     private void ReregisterCommand(string _)
     {
         UnregisterCommand();
         RegisterCommand();
     }
+
     private void OnCommand(string command, string args)
     {
         ToggleConfigUi();
@@ -120,12 +131,15 @@ public sealed class Plugin : IAsyncDalamudPlugin
     #endregion
 
     #region Event Handlers
+
     private void OnLogin() => UpdateStartTime();
+
     private void OnLogout(int type, int code)
     {
         CollectContext.ClearCache();
         SetDefaultPresence();
     }
+
     private void OnZoneChange(uint territoryId) => UpdateStartTime(territoryId);
 
     #endregion
@@ -133,20 +147,25 @@ public sealed class Plugin : IAsyncDalamudPlugin
     private void ToggleConfigUi() => ConfigWindow.Toggle();
 
     #region RPC Functions
+
     private void SetDefaultPresence()
     {
         DiscordService.SetPresence(DefaultPresence);
-        DiscordService.UpdatePresenceDetails(LocalizationService.Localize("DalamudRichPresenceInMenus", LocalizationLanguage.Client));
+        DiscordService.UpdatePresenceDetails(LocalizationService.Localize("DalamudRichPresenceInMenus",
+            LocalizationLanguage.Client));
         UpdateStartTime();
     }
+
     private void UpdateStartTime(uint? newTerritoryId = null)
     {
-        if (Configuration.ResetTimeWhenChangingZones && newTerritoryId != null && (newTerritoryId != lastTerritoryId || lastTerritoryId == null))
+        if (Configuration.ResetTimeWhenChangingZones && newTerritoryId != null &&
+            (newTerritoryId != lastTerritoryId || lastTerritoryId == null))
         {
             lastTerritoryId = newTerritoryId.Value;
             startTime = DateTime.UtcNow;
         }
     }
+
     private void UpdatePresence(IFramework framework)
     {
         try
@@ -163,6 +182,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
                         inQueue = false;
                         SetDefaultPresence();
                     }
+
                     return;
                 }
 
@@ -200,6 +220,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
                     DiscordService.ClearPresence();
                     lastPresence = null;
                 }
+
                 return;
             }
 
@@ -230,6 +251,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     }
 
     #endregion
+
     public ValueTask DisposeAsync()
     {
         PluginInterface.LanguageChanged -= ReregisterCommand;
@@ -254,4 +276,3 @@ public sealed class Plugin : IAsyncDalamudPlugin
         return ValueTask.CompletedTask;
     }
 }
-

@@ -39,6 +39,7 @@ namespace Dalamud.RichPresence.Windows
             this.plugin = plugin;
             configuration = plugin.Configuration;
         }
+
         private void UpdatePreviewContext()
         {
             if (Plugin.ObjectTable.LocalPlayer != null)
@@ -66,7 +67,7 @@ namespace Dalamud.RichPresence.Windows
                     ClassJobAbbreviation: "BLM",
                     Level: 100
                 );
-                
+
                 previewStatus = new OnlineStatusContext(
                     IsAfk: false,
                     WatchingCutscene: false,
@@ -136,8 +137,10 @@ namespace Dalamud.RichPresence.Windows
                     configuration.Save();
                     plugin.DiscordService.ReloadClient();
                 }
+
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Enables the use of a custom port for the RPC TCP Bridge. Only enable this if you have a specific reason to change the port.");
+                    ImGui.SetTooltip(
+                        "Enables the use of a custom port for the RPC TCP Bridge. Only enable this if you have a specific reason to change the port.");
 
                 ImGui.Spacing();
 
@@ -150,8 +153,10 @@ namespace Dalamud.RichPresence.Windows
                         tcpPort = Math.Clamp(tcpPort, 1024, 65535);
                         configuration.RpcTcpBridgePort = tcpPort;
                     }
+
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Sets the port for the RPC TCP Bridge. Only change this if you have a specific reason to do so.");
+                        ImGui.SetTooltip(
+                            "Sets the port for the RPC TCP Bridge. Only change this if you have a specific reason to do so.");
                     ImGui.SameLine();
                     if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
                     {
@@ -174,8 +179,10 @@ namespace Dalamud.RichPresence.Windows
                 configuration.ShowJobIcon = showJobIcon;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Displays your current job class icon instead of the online status icon for the small image in Discord RPC.");
+                ImGui.SetTooltip(
+                    "Displays your current job class icon instead of the online status icon for the small image in Discord RPC.");
 
             var shortenJobName = configuration.AbbreviateJob;
             if (ImGui.Checkbox("Abbreviate Job Name", ref shortenJobName))
@@ -183,6 +190,7 @@ namespace Dalamud.RichPresence.Windows
                 configuration.AbbreviateJob = shortenJobName;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Shortens the Job Name from 'Summoner' to 'SMN'.");
 
@@ -192,6 +200,7 @@ namespace Dalamud.RichPresence.Windows
                 configuration.ShowPartyData = showPartyData;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Displays how many people are in your party in Discord RPC (e.g. 7 of 8 players).");
 
@@ -201,6 +210,7 @@ namespace Dalamud.RichPresence.Windows
                 configuration.DisplayDiscordTimestamp = showTimestamps;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Displays the time you have been in a region/on XIV.");
 
@@ -210,6 +220,7 @@ namespace Dalamud.RichPresence.Windows
                 configuration.ShowLoginQueuePosition = showQueue;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Displays the queue time when logging in (requires Waitingway).");
 
@@ -219,6 +230,7 @@ namespace Dalamud.RichPresence.Windows
                 configuration.ShowAfk = showAfkStatus;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Displays your AFK status to Discord");
 
@@ -228,6 +240,7 @@ namespace Dalamud.RichPresence.Windows
                 configuration.HideEntirelyWhenAfk = hideAllWhileAfk;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Hides most information about you when you are AFK to Discord.");
 
@@ -237,6 +250,7 @@ namespace Dalamud.RichPresence.Windows
                 configuration.HideInCutscene = hideInCutscenes;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip("Hides most information about you when you are watching a cutscene.");
 
@@ -246,8 +260,10 @@ namespace Dalamud.RichPresence.Windows
                 configuration.ResetTimeWhenChangingZones = resetTimerOnZoneChange;
                 configuration.Save();
             }
+
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Resets the timestamp timer when changing zones/duties. Otherwise, the timer will count based off login time.");
+                ImGui.SetTooltip(
+                    "Resets the timestamp timer when changing zones/duties. Otherwise, the timer will count based off login time.");
         }
 
         private static void DrawTagGuideHeader()
@@ -263,7 +279,8 @@ namespace Dalamud.RichPresence.Windows
                     var tagWidth = ImGui.CalcTextSize(tag).X + style.FramePadding.X * 2;
 
                     // Wrap to next line if this tag won't fit
-                    if (ImGui.GetCursorPosX() + tagWidth > availableWidth && ImGui.GetCursorPosX() > style.WindowPadding.X)
+                    if (ImGui.GetCursorPosX() + tagWidth > availableWidth &&
+                        ImGui.GetCursorPosX() > style.WindowPadding.X)
                         ImGui.NewLine();
 
                     using (ImRaii.PushColor(ImGuiCol.Button, ImGuiColors.ParsedGold with { W = 0.2f }))
@@ -280,10 +297,13 @@ namespace Dalamud.RichPresence.Windows
 
                     ImGui.SameLine();
                 }
+
                 ImGui.NewLine();
             }
         }
-        private void DrawTemplateInput(string label, string hint, string tooltip, ref string draft, Action<string> setter, Action reset)
+
+        private void DrawTemplateInput(string label, string hint, string tooltip, ref string draft,
+            Action<string> setter, Action reset)
         {
             using (ImRaii.PushId(label))
             {
@@ -298,6 +318,7 @@ namespace Dalamud.RichPresence.Windows
                     setter(draft);
                     configuration.Save();
                 }
+
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Reset to Defaults");
 
@@ -307,6 +328,7 @@ namespace Dalamud.RichPresence.Windows
                     setter(draft);
                     configuration.Save();
                 }
+
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Save Changes");
 
@@ -322,7 +344,6 @@ namespace Dalamud.RichPresence.Windows
 
         public void Dispose()
         {
-            
         }
     }
 }

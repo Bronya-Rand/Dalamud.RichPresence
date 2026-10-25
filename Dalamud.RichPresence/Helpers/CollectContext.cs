@@ -13,6 +13,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Info;
 namespace Dalamud.RichPresence.Helpers
 {
     internal readonly record struct QueueContext(bool IsInQueue, int Position, TimeSpan? Estimate);
+
     /// <summary>
     /// A record containing a player's online status info
     /// </summary>
@@ -30,7 +31,13 @@ namespace Dalamud.RichPresence.Helpers
     /// <param name="PartySize">The current party size</param>
     /// <param name="PartyMaxSize">The max players the party can hold</param>
     /// <param name="HashedPartyId">An SHA-256 ID of the party</param>
-    public readonly record struct PartyContext(bool InParty, bool InDuty, bool IsPartyCrossRealm, int PartySize, int PartyMaxSize, string HashedPartyId);
+    public readonly record struct PartyContext(
+        bool InParty,
+        bool InDuty,
+        bool IsPartyCrossRealm,
+        int PartySize,
+        int PartyMaxSize,
+        string HashedPartyId);
 
     /// <summary>
     /// A record containing a player's info
@@ -52,13 +59,23 @@ namespace Dalamud.RichPresence.Helpers
     /// <param name="ClassJobAbbreviation">The 3 letter abbreviation of the player's current class</param>
     /// <param name="Level">The player's level</param>
     public readonly record struct PlayerContext(
-        string PlayerName, string? FcTag,
-        uint CurrentWorldId, string CurrentWorld,
-        uint HomeWorldId, string HomeWorld,
+        string PlayerName,
+        string? FcTag,
+        uint CurrentWorldId,
+        string CurrentWorld,
+        uint HomeWorldId,
+        string HomeWorld,
         bool IsOnHomeWorld,
         string DataCenterName,
-        string TerritoryName, uint TerritoryLoadingImageId, sbyte WardId, uint InstanceId,
-        uint ClassJobId, string ClassJob, string ClassJobAbbreviation, int Level);
+        string TerritoryName,
+        uint TerritoryLoadingImageId,
+        sbyte WardId,
+        uint InstanceId,
+        uint ClassJobId,
+        string ClassJob,
+        string ClassJobAbbreviation,
+        int Level);
+
     internal class CollectContext(Configuration configuration)
     {
         private readonly Configuration configuration = configuration;
@@ -88,6 +105,7 @@ namespace Dalamud.RichPresence.Helpers
             var eta = Plugin.WaitingwayIpc.GetQueueEstimate();
             return new QueueContext(true, positionInQueue, eta);
         }
+
         public static OnlineStatusContext OnlineStatus
         {
             get
@@ -96,8 +114,8 @@ namespace Dalamud.RichPresence.Helpers
 
                 var localPlayer = Plugin.ObjectTable.LocalPlayer;
                 var watchingCutscene = Plugin.Condition[ConditionFlag.WatchingCutscene]
-                    || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-                    || Plugin.Condition[ConditionFlag.WatchingCutscene78];
+                                       || Plugin.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+                                       || Plugin.Condition[ConditionFlag.WatchingCutscene78];
 
                 var onlineStatusRowId = localPlayer.OnlineStatus.Value.RowId;
                 var onlineStatusStr = localPlayer.OnlineStatus.Value.Name.ExtractText();
@@ -133,7 +151,8 @@ namespace Dalamud.RichPresence.Helpers
             else
             {
                 var infoProxyCrossRealm = InfoProxyCrossRealm.Instance();
-                if (infoProxyCrossRealm == null || !infoProxyCrossRealm->IsInCrossRealmParty) return new PartyContext(false, false, false, -1, -1, string.Empty);
+                if (infoProxyCrossRealm == null || !infoProxyCrossRealm->IsInCrossRealmParty)
+                    return new PartyContext(false, false, false, -1, -1, string.Empty);
 
                 var partySize = InfoProxyCrossRealm.GetGroupMemberCount(infoProxyCrossRealm->LocalPlayerGroupIndex);
 
@@ -145,6 +164,7 @@ namespace Dalamud.RichPresence.Helpers
                 {
                     memberArray[i] = *InfoProxyCrossRealm.GetGroupMember(i, infoProxyCrossRealm->LocalPlayerGroupIndex);
                 }
+
                 var lowestContentId = memberArray.OrderBy(m => m.ContentId).Select(m => m.ContentId).First();
 
                 return new PartyContext(
@@ -157,23 +177,27 @@ namespace Dalamud.RichPresence.Helpers
                 );
             }
         }
+
         public unsafe PlayerContext GetPlayerStatus()
         {
             if (Plugin.ObjectTable.LocalPlayer == null)
-                return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false, string.Empty, string.Empty, 0, -1, 0, 0, string.Empty, string.Empty, -1);
+                return new PlayerContext(string.Empty, string.Empty, 0, string.Empty, 0, string.Empty, false,
+                    string.Empty, string.Empty, 0, -1, 0, 0, string.Empty, string.Empty, -1);
 
             var localPlayer = Plugin.ObjectTable.LocalPlayer;
             var fcTag = localPlayer.CompanyTag.TextValue;
 
             // Cache the FC name for use in duties where the game doesn't provide it.
-            if ((cachedFcName == null && !fcTag.IsNullOrEmpty()) || (cachedFcName != null && !fcTag.IsNullOrEmpty() && cachedFcName != fcTag))
+            if ((cachedFcName == null && !fcTag.IsNullOrEmpty()) ||
+                (cachedFcName != null && !fcTag.IsNullOrEmpty() && cachedFcName != fcTag))
                 cachedFcName = fcTag;
 
             var territoryId = Plugin.ClientState.TerritoryType;
 
             var housingManager = HousingManager.Instance();
             if (housingManager != null && housingManager->IsInside())
-                territoryId = LuminaService.Instance.GetOriginalTerritoryId(HousingManager.GetOriginalHouseTerritoryTypeId());
+                territoryId =
+                    LuminaService.Instance.GetOriginalTerritoryId(HousingManager.GetOriginalHouseTerritoryTypeId());
 
             var wardId = housingManager->GetCurrentWard();
             var territoryName = string.Empty;
@@ -190,6 +214,7 @@ namespace Dalamud.RichPresence.Helpers
                 else
                     territoryName = $"Unknown Territory {territoryId}";
             }
+
             var uiState = UIState.Instance();
             var instanceId = uiState->PublicInstance.InstanceId;
 
@@ -220,6 +245,7 @@ namespace Dalamud.RichPresence.Helpers
                 Level: localPlayer.Level
             );
         }
+
         private static string GetStringSha256Hash(string input)
         {
             if (string.IsNullOrEmpty(input)) return string.Empty;

@@ -39,6 +39,7 @@ public static partial class ParserService
                 return false;
             }
         }
+
         return true;
     }
 

@@ -38,8 +38,8 @@ namespace Dalamud.RichPresence.Services.Discord
                         rpcTransport = new DiscordUnixSocket();
                     else
                     {
-                        rpcTransport = configuration.UseCustomRpcTcpBridgePort ? 
-                            new DiscordTcpSocket(port: configuration.RpcTcpBridgePort) 
+                        rpcTransport = configuration.UseCustomRpcTcpBridgePort
+                            ? new DiscordTcpSocket(port: configuration.RpcTcpBridgePort)
                             : new DiscordTcpSocket();
 
                         if (!tcpBridgeNotificationShown)
@@ -81,27 +81,32 @@ namespace Dalamud.RichPresence.Services.Discord
             if (!rpcClient.IsInitialized)
                 rpcClient.Initialize();
         }
+
         public void SetPresence(DiscordRPC.RichPresence presence)
         {
             CreateClient();
             lastPresence = presence;
             rpcClient.SetPresence(presence);
         }
+
         public void ClearPresence()
         {
             CreateClient();
             rpcClient.ClearPresence();
         }
+
         public void UpdatePresenceDetails(string details)
         {
             CreateClient();
             rpcClient.UpdateDetails(details);
         }
+
         public void UpdatePresenceStartTime(DateTime startTime)
         {
             CreateClient();
             rpcClient.UpdateStartTime(startTime);
         }
+
         public void Dispose() => rpcClient.Dispose();
 
         public void ReloadClient()
@@ -109,7 +114,8 @@ namespace Dalamud.RichPresence.Services.Discord
             Dispose();
             CreateClient();
         }
-        private void NotificationActions(INotificationDrawArgs args)
+
+        private static void NotificationActions(INotificationDrawArgs args)
         {
             if (ImGui.Button("Download RPC Bridge"))
                 Process.Start(new ProcessStartInfo

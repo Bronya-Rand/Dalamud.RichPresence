@@ -18,6 +18,7 @@ public class Configuration : IPluginConfiguration
     /// The template strings to use for displaying in Discord RPC.
     /// </summary>
     public string DiscordDetailField = "{playername} {fc}";
+
     public string DiscordStateField = "{world}";
     public string DiscordSmallImageTextField = "{job} Lv. {level}";
     public string DiscordLargeImageTextField = "{location} {ward}";
@@ -62,6 +63,7 @@ public class Configuration : IPluginConfiguration
     /// Determines whether to hide info whilst in a cutscene.
     /// </summary>
     public bool HideInCutscene;
+
     public bool UseCustomRpcTcpBridgePort;
     public int RpcTcpBridgePort = 2026;
     public void Save() => Plugin.PluginInterface.SavePluginConfig(this);

@@ -23,7 +23,10 @@ namespace Dalamud.RichPresence.Services.Discord
                 Plugin.Log.Info($"Connected to Discord TCP bridge at {host}:{Port}");
                 return true;
             }
-            catch (SocketException) { return false; } // Ignore socket exceptions,
+            catch (SocketException)
+            {
+                return false;
+            } // Ignore socket exceptions,
             catch (Exception ex)
             {
                 Plugin.Log.Error(ex, $"Failed to connect to Discord TCP bridge at {host}:{Port}");
@@ -31,6 +34,7 @@ namespace Dalamud.RichPresence.Services.Discord
                 return false;
             }
         }
+
         public override void Dispose()
         {
             Stream?.Dispose();

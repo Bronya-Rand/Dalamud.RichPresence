@@ -67,25 +67,25 @@ namespace Dalamud.RichPresence.Helpers
         /// Stores the FC name (if any) of a player. Used for when transitioning from overworld to
         /// duty where duties omit FC tags.
         /// </summary>
-        private string? CachedFCName;
+        private string? cachedFcName;
 
         public void ClearCache()
         {
-            CachedFCName = null;
+            cachedFcName = null;
         }
 
         public QueueContext GetQueueStatus()
         {
             // Exit if user has disabled queue position or Waitingway states that we're not in a login queue.
-            if (!configuration.ShowLoginQueuePosition || !Plugin.WaitingwayIPC.IsInLoginQueue())
+            if (!configuration.ShowLoginQueuePosition || !Plugin.WaitingwayIpc.IsInLoginQueue())
                 return new QueueContext(false, -1, null);
 
-            var positionInQueue = Plugin.WaitingwayIPC.GetQueuePosition();
+            var positionInQueue = Plugin.WaitingwayIpc.GetQueuePosition();
             if (positionInQueue == -1)
                 // Queue position hasn't loaded yet.
                 return new QueueContext(false, -1, null);
 
-            var eta = Plugin.WaitingwayIPC.GetQueueEstimate();
+            var eta = Plugin.WaitingwayIpc.GetQueueEstimate();
             return new QueueContext(true, positionInQueue, eta);
         }
         public static OnlineStatusContext OnlineStatus
@@ -166,8 +166,8 @@ namespace Dalamud.RichPresence.Helpers
             var fcTag = localPlayer.CompanyTag.TextValue;
 
             // Cache the FC name for use in duties where the game doesn't provide it.
-            if ((CachedFCName == null && !fcTag.IsNullOrEmpty()) || (CachedFCName != null && !fcTag.IsNullOrEmpty() && CachedFCName != fcTag))
-                CachedFCName = fcTag;
+            if ((cachedFcName == null && !fcTag.IsNullOrEmpty()) || (cachedFcName != null && !fcTag.IsNullOrEmpty() && cachedFcName != fcTag))
+                cachedFcName = fcTag;
 
             var territoryId = Plugin.ClientState.TerritoryType;
 
@@ -203,7 +203,7 @@ namespace Dalamud.RichPresence.Helpers
 
             return new PlayerContext(
                 PlayerName: localPlayer.Name.TextValue,
-                FcTag: CachedFCName,
+                FcTag: cachedFcName,
                 CurrentWorldId: currentWorldId,
                 CurrentWorld: currentWorld,
                 HomeWorldId: homeWorldId,

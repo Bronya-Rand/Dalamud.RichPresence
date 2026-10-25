@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
@@ -14,14 +16,14 @@ using DiscordRPC;
 
 namespace Dalamud.RichPresence;
 
-public sealed class Plugin : IDalamudPlugin
+public sealed class Plugin : IAsyncDalamudPlugin
 {
     #region Dalamud Services
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
-    [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
-    [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
-    [PluginService] internal static IFramework Framework { get; private set; } = null!;
+    [PluginService] private static ICommandManager CommandManager { get; set; } = null!;
+    [PluginService] private static IDataManager DataManager { get; set; } = null!;
+    [PluginService] private static IFramework Framework { get; set; } = null!;
     [PluginService] internal static IPartyList PartyList { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
     [PluginService] internal static IObjectTable ObjectTable { get; set; } = null!;
@@ -30,14 +32,14 @@ public sealed class Plugin : IDalamudPlugin
     #endregion
 
     #region Plugin Managers and Services
-    public Configuration Configuration { get; init; } = null!;
+    public Configuration Configuration { get; private set; } = null!;
     private readonly WindowSystem windowSystem = new("RichPresence");
-    private ConfigWindow ConfigWindow { get; init; } = null!;
-    private LuminaService LuminaService { get; init; } = null!;
-    internal DiscordService DiscordService { get; init; } = null!;
-    internal CollectContext CollectContext { get; init; } = null!;
+    private ConfigWindow ConfigWindow { get; set; } = null!;
+    private LuminaService LuminaService { get; set; } = null!;
+    internal DiscordService DiscordService { get; private set; } = null!;
+    internal CollectContext CollectContext { get; private set; } = null!;
     internal static LocalizationService LocalizationService { get; private set; } = null!;
-    internal static WaitingwayIPC WaitingwayIPC { get; private set; } = null!;
+    internal static WaitingwayIPC WaitingwayIpc { get; private set; } = null!;
     #endregion
 
     #region Initialization Variables
@@ -60,8 +62,10 @@ public sealed class Plugin : IDalamudPlugin
     };
     #endregion
 
-    public Plugin()
+    public Task LoadAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+        
         // Load / create config
         var config = PluginInterface.GetPluginConfig();
         Configuration = Migrate.TryMigrateFromLegacyConfig(config) ?? new Configuration();
@@ -69,7 +73,7 @@ public sealed class Plugin : IDalamudPlugin
         // Initialize services and managers
         LuminaService = new LuminaService(DataManager);
         LocalizationService = new LocalizationService();
-        WaitingwayIPC = new WaitingwayIPC();
+        WaitingwayIpc = new WaitingwayIPC();
         DiscordService = new DiscordService(Configuration);
         CollectContext = new CollectContext(Configuration);
 
@@ -90,7 +94,7 @@ public sealed class Plugin : IDalamudPlugin
         RegisterCommand();
         PluginInterface.LanguageChanged += ReregisterCommand;
 
-        Log.Info("Loaded Discord RPC");
+        return Task.CompletedTask;
     }
 
     #region Plugin Commands
@@ -152,7 +156,7 @@ public sealed class Plugin : IDalamudPlugin
 
             if (ObjectTable.LocalPlayer == null)
             {
-                if (!Configuration.ShowLoginQueuePosition || !WaitingwayIPC.IsInLoginQueue())
+                if (!Configuration.ShowLoginQueuePosition || !WaitingwayIpc.IsInLoginQueue())
                 {
                     if (inQueue)
                     {
@@ -162,10 +166,10 @@ public sealed class Plugin : IDalamudPlugin
                     return;
                 }
 
-                var queuePos = WaitingwayIPC.GetQueuePosition();
+                var queuePos = WaitingwayIpc.GetQueuePosition();
                 if (queuePos < 0) return; // Not loaded, wait for next update
 
-                var queueEstimate = WaitingwayIPC.GetQueueEstimate();
+                var queueEstimate = WaitingwayIpc.GetQueueEstimate();
                 inQueue = true;
 
                 // Create presence for login queue
@@ -226,7 +230,7 @@ public sealed class Plugin : IDalamudPlugin
     }
 
     #endregion
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
         PluginInterface.LanguageChanged -= ReregisterCommand;
         UnregisterCommand();
@@ -241,11 +245,13 @@ public sealed class Plugin : IDalamudPlugin
         PluginInterface.UiBuilder.OpenConfigUi -= ToggleConfigUi;
 
         windowSystem.RemoveAllWindows();
-        ConfigWindow?.Dispose();
+        ConfigWindow.Dispose();
 
-        LocalizationService?.Dispose();
-        LuminaService?.Dispose();
-        DiscordService?.Dispose();
+        LocalizationService.Dispose();
+        LuminaService.Dispose();
+        DiscordService.Dispose();
+
+        return ValueTask.CompletedTask;
     }
 }
 

@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.ImGuiNotification.EventArgs;
@@ -16,7 +15,7 @@ namespace Dalamud.RichPresence.Services.Discord
     {
         private readonly Configuration configuration;
         private const string DiscordClientId = "478143453536976896";
-
+        
         private DiscordRpcClient? rpcClient;
         private DiscordRPC.RichPresence? lastPresence;
         private volatile bool isFirstStart = true;
@@ -25,13 +24,13 @@ namespace Dalamud.RichPresence.Services.Discord
         public DiscordService(Configuration configuration)
         {
             this.configuration = configuration;
-            CreateClient();
+            EnsureClient();
         }
-        
-        [MemberNotNull(nameof(rpcClient))]
-        private void CreateClient()
+
+        private DiscordRpcClient EnsureClient()
         {
-            if (rpcClient == null || rpcClient.IsDisposed)
+            var client = rpcClient;
+            if (client == null || client.IsDisposed)
             {
                 INamedPipeClient? rpcTransport = null;
                 if (Util.IsWine())
@@ -57,12 +56,14 @@ namespace Dalamud.RichPresence.Services.Discord
                         }
                     }
                 }
-
-                rpcClient = new DiscordRpcClient(DiscordClientId, client: rpcTransport)
+                
+                client = new DiscordRpcClient(DiscordClientId, client: rpcTransport)
                 {
                     Logger = new RpcLogger { Level = LogLevel.Trace },
                 };
-                rpcClient.OnReady += (_, e) =>
+
+                var created = client;
+                created.OnReady += (_, e) =>
                 {
                     Plugin.Log.Info($"Discord RPC ready: {e.User?.Username}");
 
@@ -71,50 +72,45 @@ namespace Dalamud.RichPresence.Services.Discord
                     if (lastPresence != null && !isFirstStart)
                     {
                         Plugin.Log.Info("Re-sending presence after reconnect.");
-                        rpcClient.SetPresence(lastPresence);
+                        created.SetPresence(lastPresence);
                     }
 
                     if (isFirstStart)
                         isFirstStart = false;
                 };
-                rpcClient.OnPresenceUpdate += (_, _) => { Plugin.Log.Verbose($"Received Presence Update"); };
-            }
+                created.OnPresenceUpdate += (_, _) => { Plugin.Log.Verbose($"Received Presence Update"); };
 
-            if (!rpcClient.IsInitialized)
-                rpcClient.Initialize();
+                rpcClient = created;
+            }
+            
+            if (!client.IsInitialized)
+                client.Initialize();
+            
+            return client;
         }
 
         public void SetPresence(DiscordRPC.RichPresence presence)
         {
-            CreateClient();
+            var client = EnsureClient();
             lastPresence = presence;
-            rpcClient.SetPresence(presence);
+            client.SetPresence(presence);
         }
 
-        public void ClearPresence()
+        public void ClearPresence() => EnsureClient().ClearPresence();
+        public void UpdatePresenceDetails(string details) => EnsureClient().UpdateDetails(details);
+
+        public void UpdatePresenceStartTime(DateTime startTime) => EnsureClient().UpdateStartTime(startTime);
+
+        public void Dispose()
         {
-            CreateClient();
-            rpcClient.ClearPresence();
+            rpcClient?.Dispose();
+            rpcClient = null;
         }
-
-        public void UpdatePresenceDetails(string details)
-        {
-            CreateClient();
-            rpcClient.UpdateDetails(details);
-        }
-
-        public void UpdatePresenceStartTime(DateTime startTime)
-        {
-            CreateClient();
-            rpcClient.UpdateStartTime(startTime);
-        }
-
-        public void Dispose() => rpcClient?.Dispose();
 
         public void ReloadClient()
         {
             Dispose();
-            CreateClient();
+            EnsureClient();
         }
 
         private static void NotificationActions(INotificationDrawArgs args)

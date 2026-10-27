@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.ImGuiNotification.EventArgs;
@@ -16,7 +17,7 @@ namespace Dalamud.RichPresence.Services.Discord
         private readonly Configuration configuration;
         private const string DiscordClientId = "478143453536976896";
 
-        private DiscordRpcClient rpcClient = null!;
+        private DiscordRpcClient? rpcClient;
         private DiscordRPC.RichPresence? lastPresence;
         private volatile bool isFirstStart = true;
         private volatile bool tcpBridgeNotificationShown;
@@ -26,10 +27,11 @@ namespace Dalamud.RichPresence.Services.Discord
             this.configuration = configuration;
             CreateClient();
         }
-
+        
+        [MemberNotNull(nameof(rpcClient))]
         private void CreateClient()
         {
-            if (rpcClient.IsDisposed)
+            if (rpcClient == null || rpcClient.IsDisposed)
             {
                 INamedPipeClient? rpcTransport = null;
                 if (Util.IsWine())
@@ -107,7 +109,7 @@ namespace Dalamud.RichPresence.Services.Discord
             rpcClient.UpdateStartTime(startTime);
         }
 
-        public void Dispose() => rpcClient.Dispose();
+        public void Dispose() => rpcClient?.Dispose();
 
         public void ReloadClient()
         {

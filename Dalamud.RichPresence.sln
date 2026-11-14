@@ -1,8 +1,10 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.7.11919.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dalamud.RichPresence", "Dalamud.RichPresence\Dalamud.RichPresence.csproj", "{42AAB406-846E-49A2-B2E4-D1428DACB8B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KamiToolKit", "KamiToolKit\KamiToolKit.csproj", "{BC37D04B-EDB8-44B3-A393-9AF411980FDA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +22,14 @@ Global
 		{42AAB406-846E-49A2-B2E4-D1428DACB8B1}.Release|Any CPU.Build.0 = Release|x64
 		{42AAB406-846E-49A2-B2E4-D1428DACB8B1}.Release|x64.ActiveCfg = Release|x64
 		{42AAB406-846E-49A2-B2E4-D1428DACB8B1}.Release|x64.Build.0 = Release|x64
+		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Debug|Any CPU.Build.0 = Debug|x64
+		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Debug|x64.ActiveCfg = Debug|x64
+		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Debug|x64.Build.0 = Debug|x64
+		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Release|Any CPU.ActiveCfg = Release|x64
+		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Release|Any CPU.Build.0 = Release|x64
+		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Release|x64.ActiveCfg = Release|x64
+		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

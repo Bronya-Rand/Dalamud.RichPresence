@@ -13,6 +13,7 @@ using Dalamud.RichPresence.Services.Discord;
 using Dalamud.RichPresence.Services.IPC;
 using Dalamud.RichPresence.Windows;
 using DiscordRPC;
+using KamiToolKit;
 
 namespace Dalamud.RichPresence;
 
@@ -38,6 +39,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     public Configuration Configuration { get; private set; } = null!;
     private readonly WindowSystem windowSystem = new("RichPresence");
     private ConfigWindow ConfigWindow { get; set; } = null!;
+    private ConfigNativeWindow ConfigNativeWindow { get; set; } = null!;
     private LuminaService LuminaService { get; set; } = null!;
     internal DiscordService DiscordService { get; private set; } = null!;
     internal CollectContext CollectContext { get; private set; } = null!;
@@ -69,13 +71,15 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
     #endregion
 
-    public Task LoadAsync(CancellationToken cancellationToken)
+    public async Task LoadAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         // Load / create config
         var config = PluginInterface.GetPluginConfig();
-        Configuration = Migrate.TryMigrateFromLegacyConfig(config) ?? new Configuration();
+        Configuration = Migrate.TryMigrateFromLegacyConfig(config)
+                        ?? new Configuration { UseNative = true };
+        Configuration.OnUseNativeChanged += HandleUseNativeChanged;
 
         // Initialize services and managers
         LuminaService = new LuminaService(DataManager);
@@ -85,8 +89,11 @@ public sealed class Plugin : IAsyncDalamudPlugin
         CollectContext = new CollectContext(Configuration);
 
         ConfigWindow = new ConfigWindow(this);
-
         windowSystem.AddWindow(ConfigWindow);
+
+        // Setup KTK
+        await KamiToolKitLibrary.InitializeAsync(PluginInterface, "Discord Rich Presence");
+        ConfigNativeWindow = new ConfigNativeWindow(this);
 
         PluginInterface.UiBuilder.Draw += windowSystem.Draw;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
@@ -100,8 +107,6 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
         RegisterCommand();
         PluginInterface.LanguageChanged += ReregisterCommand;
-
-        return Task.CompletedTask;
     }
 
     #region Plugin Commands
@@ -123,10 +128,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         RegisterCommand();
     }
 
-    private void OnCommand(string command, string args)
-    {
-        ToggleConfigUi();
-    }
+    private void OnCommand(string command, string args) => ToggleConfigUi();
 
     #endregion
 
@@ -144,7 +146,13 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
     #endregion
 
-    private void ToggleConfigUi() => ConfigWindow.Toggle();
+    private void ToggleConfigUi()
+    {
+        if (Configuration.UseNative)
+            ConfigNativeWindow.Toggle();
+        else
+            ConfigWindow.Toggle();
+    }
 
     #region RPC Functions
 
@@ -252,7 +260,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
     #endregion
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         PluginInterface.LanguageChanged -= ReregisterCommand;
         UnregisterCommand();
@@ -268,11 +276,34 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
         windowSystem.RemoveAllWindows();
         ConfigWindow.Dispose();
+        await ConfigNativeWindow.DisposeAsync();
 
         LocalizationService.Dispose();
         LuminaService.Dispose();
         DiscordService.Dispose();
+        await KamiToolKitLibrary.DisposeAsync();
+    }
 
-        return ValueTask.CompletedTask;
+    private void CloseAllUi()
+    {
+        // ImGui
+        ConfigWindow.IsOpen = false;
+
+        // Native
+        if (ConfigNativeWindow.IsOpen)
+            ConfigNativeWindow.Close();
+    }
+
+    private void HandleUseNativeChanged(bool useNative)
+    {
+        Framework.Run(() =>
+        {
+            CloseAllUi();
+
+            if (useNative)
+                ConfigNativeWindow.Open();
+            else
+                ConfigWindow.IsOpen = true;
+        });
     }
 }

@@ -8,7 +8,6 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.RichPresence.Helpers;
 using Dalamud.RichPresence.Services;
-using Dalamud.Utility;
 
 namespace Dalamud.RichPresence.Windows
 {
@@ -17,12 +16,11 @@ namespace Dalamud.RichPresence.Windows
         private readonly Plugin plugin;
         private readonly Configuration configuration;
 
-        private string editingDetail = string.Empty;
-        private string editingState = string.Empty;
-        private string editingLargeImageText = string.Empty;
-        private string editingSmallImageText = string.Empty;
+        // Editable configuration fields
+        private readonly string[] templateDrafts = new string[ConfigUiSettings.Templates.Length];
+        private int editingPort;
 
-        // For showing a live preview of what gets sent to Discord.
+        // For previewing what gets sent to Discord with live data
         private PlayerContext previewPlayer;
         private OnlineStatusContext previewStatus;
 
@@ -40,131 +38,27 @@ namespace Dalamud.RichPresence.Windows
             configuration = plugin.Configuration;
         }
 
-        private void UpdatePreviewContext()
-        {
-            if (Plugin.ObjectTable.LocalPlayer != null)
-            {
-                previewPlayer = plugin.CollectContext.GetPlayerStatus();
-                previewStatus = CollectContext.OnlineStatus;
-            }
-            else
-            {
-                previewPlayer = new PlayerContext(
-                    PlayerName: "Y'shtola Rhul",
-                    FcTag: "FFXIV",
-                    CurrentWorldId: 0,
-                    CurrentWorld: "Eorzea",
-                    HomeWorldId: 0,
-                    HomeWorld: "Hydaleyn",
-                    IsOnHomeWorld: true,
-                    DataCenterName: "Scion",
-                    TerritoryName: "Limsa Lominsa Lower Decks",
-                    TerritoryLoadingImageId: 1,
-                    WardId: 0,
-                    InstanceId: 0,
-                    ClassJobId: 0,
-                    ClassJob: "Black Mage",
-                    ClassJobAbbreviation: "BLM",
-                    Level: 100
-                );
-
-                previewStatus = new OnlineStatusContext(
-                    IsAfk: false,
-                    WatchingCutscene: false,
-                    StatusName: "Online"
-                );
-            }
-        }
-
         /// <summary>
         /// Sets the editing fields for the config window.
         /// </summary>
         public override void OnOpen()
         {
-            editingDetail = configuration.DiscordDetailField;
-            editingState = configuration.DiscordStateField;
-            editingLargeImageText = configuration.DiscordLargeImageTextField;
-            editingSmallImageText = configuration.DiscordSmallImageTextField;
+            for (var index = 0; index < templateDrafts.Length; index++)
+                templateDrafts[index] = ConfigUiSettings.Templates[index].Get(configuration);
+            editingPort = ConfigUiSettings.ClampPort(configuration.RpcTcpBridgePort);
         }
 
         public override void Draw()
         {
-            UpdatePreviewContext();
+            (previewPlayer, previewStatus) = ConfigUiSettings.GetPreviewContext(plugin);
 
-            ImGui.Text("Rich Presence Template");
-            ImGui.Spacing();
-
-            DrawTemplateInput("Details", "Type a custom message",
-                "Sets the top part of the Discord RPC header below the game's name.",
-                ref editingDetail,
-                v => configuration.DiscordDetailField = v,
-                () => { editingDetail = Constants.DefaultDiscordDetailStr; });
-
-            DrawTemplateInput("State", "Type a custom message",
-                "Sets the bottom part of the Discord RPC header below the game's name.",
-                ref editingState,
-                v => configuration.DiscordStateField = v,
-                () => { editingState = Constants.DefaultDiscordStateStr; });
-
-            DrawTemplateInput("Large Image Text", "Type a custom message",
-                "Sets the text that appears when hovering over the large image.",
-                ref editingLargeImageText,
-                v => configuration.DiscordLargeImageTextField = v,
-                () => { editingLargeImageText = Constants.DefaultDiscordLargeImageStr; });
-            DrawTemplateInput("Small Image Text", "Type a custom message",
-                "Sets the text that appears when hovering over the small image.",
-                ref editingSmallImageText,
-                v => configuration.DiscordSmallImageTextField = v,
-                () => { editingSmallImageText = Constants.DefaultDiscordSmallImageStr; });
-
-            ImGui.Spacing();
-            DrawTagGuideHeader();
+            for (var index = 0; index < templateDrafts.Length; index++)
+                DrawTemplateInput(ConfigUiSettings.Templates[index], ref templateDrafts[index]);
 
             ImGui.Spacing();
             ImGui.Separator();
             ImGui.Spacing();
-
-            // Only show this if on Wine/Proton and AfUnix is not supported
-            if (Util.IsWine() && !AfUnixHelper.IsAfUnixSupported())
-            {
-                ImGui.Text("Wine/Proton RPC Bridge Settings");
-                ImGui.Spacing();
-
-                var useCustomPort = configuration.UseCustomRpcTcpBridgePort;
-                if (ImGui.Checkbox("Use Custom RPC TCP Bridge Port", ref useCustomPort))
-                {
-                    configuration.UseCustomRpcTcpBridgePort = useCustomPort;
-                    configuration.Save();
-                    plugin.DiscordService.ReloadClient();
-                }
-
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(
-                        "Enables the use of a custom port for the RPC TCP Bridge. Only enable this if you have a specific reason to change the port.");
-
-                ImGui.Spacing();
-
-                using (ImRaii.Disabled(!configuration.UseCustomRpcTcpBridgePort))
-                {
-                    var tcpPort = configuration.RpcTcpBridgePort;
-                    if (ImGui.InputInt("RPC TCP Bridge Port", ref tcpPort))
-                    {
-                        // Clamp the port number to a valid range
-                        tcpPort = Math.Clamp(tcpPort, 1024, 65535);
-                        configuration.RpcTcpBridgePort = tcpPort;
-                    }
-
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip(
-                            "Sets the port for the RPC TCP Bridge. Only change this if you have a specific reason to do so.");
-                    ImGui.SameLine();
-                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
-                    {
-                        configuration.Save();
-                        plugin.DiscordService.ReloadClient();
-                    }
-                }
-            }
+            DrawTagGuideHeader();
 
             ImGui.Spacing();
             ImGui.Separator();
@@ -173,97 +67,58 @@ namespace Dalamud.RichPresence.Windows
             ImGui.Text("Rich Presence Conditions");
             ImGui.Spacing();
 
-            var showJobIcon = configuration.ShowJobIcon;
-            if (ImGui.Checkbox("Display Job Icon for Small Image", ref showJobIcon))
+            foreach (var setting in ConfigUiSettings.Conditions)
+                DrawCheckbox(setting);
+
+            // Only show if on Wine/Proton and AfUnix is not supported
+            if (ConfigUiSettings.ShowBridgeSettings)
             {
-                configuration.ShowJobIcon = showJobIcon;
-                configuration.Save();
+                ImGui.Text(ConfigUiSettings.WineSectionTitle);
+                ImGui.Spacing();
+
+                var useCustomPort = configuration.UseCustomRpcTcpBridgePort;
+                if (ImGui.Checkbox($"{ConfigUiSettings.CustomPortLabel}###RPCWineBridgeUseUserPort", ref useCustomPort))
+                    ConfigUiSettings.SaveCustomPortEnabled(configuration, useCustomPort,
+                        () => plugin.DiscordService.ReloadClient());
+
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(
+                        ConfigUiSettings.CustomPortTooltip);
+
+                ImGui.Spacing();
+
+                using (ImRaii.Disabled(!configuration.UseCustomRpcTcpBridgePort))
+                {
+                    if (ImGui.InputInt($"{ConfigUiSettings.PortLabel}###RPCWineBridgeUserPort", ref editingPort))
+                    {
+                        editingPort = ConfigUiSettings.ClampPort(editingPort);
+                    }
+
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip(
+                            ConfigUiSettings.PortTooltip);
+                    ImGui.SameLine();
+                    if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
+                        ConfigUiSettings.SavePort(configuration, editingPort,
+                            () => plugin.DiscordService.ReloadClient());
+                }
             }
 
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
+            ImGui.Text("UI");
+
+            DrawCheckbox(ConfigUiSettings.NativeUi);
+        }
+
+        private void DrawCheckbox(CheckboxSetting setting)
+        {
+            var value = setting.Get(configuration);
+            if (ImGui.Checkbox($"{setting.Label}###{setting.Id}", ref value))
+                setting.Save(configuration, value);
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(
-                    "Displays your current job class icon instead of the online status icon for the small image in Discord RPC.");
-
-            var shortenJobName = configuration.AbbreviateJob;
-            if (ImGui.Checkbox("Abbreviate Job Name", ref shortenJobName))
-            {
-                configuration.AbbreviateJob = shortenJobName;
-                configuration.Save();
-            }
-
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Shortens the Job Name from 'Summoner' to 'SMN'.");
-
-            var showPartyData = configuration.ShowPartyData;
-            if (ImGui.Checkbox("Display Party Information", ref showPartyData))
-            {
-                configuration.ShowPartyData = showPartyData;
-                configuration.Save();
-            }
-
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Displays how many people are in your party in Discord RPC (e.g. 7 of 8 players).");
-
-            var showTimestamps = configuration.DisplayDiscordTimestamp;
-            if (ImGui.Checkbox("Display Timestamps", ref showTimestamps))
-            {
-                configuration.DisplayDiscordTimestamp = showTimestamps;
-                configuration.Save();
-            }
-
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Displays the time you have been in a region/on XIV.");
-
-            var showQueue = configuration.ShowLoginQueuePosition;
-            if (ImGui.Checkbox("Display Queue Times [Waitingway]", ref showQueue))
-            {
-                configuration.ShowLoginQueuePosition = showQueue;
-                configuration.Save();
-            }
-
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Displays the queue time when logging in (requires Waitingway).");
-
-            var showAfkStatus = configuration.ShowAfk;
-            if (ImGui.Checkbox("Display AFK Status", ref showAfkStatus))
-            {
-                configuration.ShowAfk = showAfkStatus;
-                configuration.Save();
-            }
-
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Displays your AFK status to Discord");
-
-            var hideAllWhileAfk = configuration.HideEntirelyWhenAfk;
-            if (ImGui.Checkbox("Hide RPC Info Whilst AFK", ref hideAllWhileAfk))
-            {
-                configuration.HideEntirelyWhenAfk = hideAllWhileAfk;
-                configuration.Save();
-            }
-
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Hides most information about you when you are AFK to Discord.");
-
-            var hideInCutscenes = configuration.HideInCutscene;
-            if (ImGui.Checkbox("Hide RPC Info Whilst In Cutscene", ref hideInCutscenes))
-            {
-                configuration.HideInCutscene = hideInCutscenes;
-                configuration.Save();
-            }
-
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Hides most information about you when you are watching a cutscene.");
-
-            var resetTimerOnZoneChange = configuration.ResetTimeWhenChangingZones;
-            if (ImGui.Checkbox("Reset Timestamps When Changing Zones", ref resetTimerOnZoneChange))
-            {
-                configuration.ResetTimeWhenChangingZones = resetTimerOnZoneChange;
-                configuration.Save();
-            }
-
-            if (ImGui.IsItemHovered())
-                ImGui.SetTooltip(
-                    "Resets the timestamp timer when changing zones/duties. Otherwise, the timer will count based off login time.");
+                ImGui.SetTooltip(setting.Tooltip);
         }
 
         private static void DrawTagGuideHeader()
@@ -302,21 +157,19 @@ namespace Dalamud.RichPresence.Windows
             }
         }
 
-        private void DrawTemplateInput(string label, string hint, string tooltip, ref string draft,
-            Action<string> setter, Action reset)
+        private void DrawTemplateInput(TemplateSetting setting, ref string draft)
         {
-            using (ImRaii.PushId(label))
+            using (ImRaii.PushId(setting.Label))
             {
-                ImGui.InputTextWithHint($"##{label}_input", hint, ref draft, 128);
+                ImGui.InputTextWithHint($"##{setting.Label}_input", "Type a custom message", ref draft, 128);
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(tooltip);
+                    ImGui.SetTooltip(setting.Tooltip);
 
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Recycle))
                 {
-                    reset();
-                    setter(draft);
-                    configuration.Save();
+                    draft = setting.DefaultValue;
+                    setting.Save(configuration, draft);
                 }
 
                 if (ImGui.IsItemHovered())
@@ -325,15 +178,14 @@ namespace Dalamud.RichPresence.Windows
                 ImGui.SameLine();
                 if (ImGuiComponents.IconButton(FontAwesomeIcon.Save))
                 {
-                    setter(draft);
-                    configuration.Save();
+                    setting.Save(configuration, draft);
                 }
 
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Save Changes");
 
                 ImGui.SameLine();
-                ImGui.Text(label);
+                ImGui.Text(setting.Label);
 
                 // Preview the result of the template parsing
                 var previewText = ParserService.Parse(draft, previewPlayer, previewStatus, configuration);

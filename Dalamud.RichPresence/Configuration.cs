@@ -66,5 +66,20 @@ public class Configuration : IPluginConfiguration
 
     public bool UseCustomRpcTcpBridgePort;
     public int RpcTcpBridgePort = 2026;
+
+    private bool useNative;
+
+    public bool UseNative
+    {
+        get => useNative;
+        set
+        {
+            if (useNative == value) return;
+            useNative = value;
+            OnUseNativeChanged?.Invoke(value);
+        }
+    }
+
+    [field: NonSerialized] public event Action<bool>? OnUseNativeChanged;
     public void Save() => Plugin.PluginInterface.SavePluginConfig(this);
 }

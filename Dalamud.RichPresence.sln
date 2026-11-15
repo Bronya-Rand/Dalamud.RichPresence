@@ -6,6 +6,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dalamud.RichPresence", "Dal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KamiToolKit", "KamiToolKit\KamiToolKit.csproj", "{BC37D04B-EDB8-44B3-A393-9AF411980FDA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KamiToolKit.Components", "KamiToolKit.Components\KamiToolKit.Components.csproj", "{63A1BF91-5390-40DF-B55D-34724A2AEEED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,14 @@ Global
 		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Release|Any CPU.Build.0 = Release|x64
 		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Release|x64.ActiveCfg = Release|x64
 		{BC37D04B-EDB8-44B3-A393-9AF411980FDA}.Release|x64.Build.0 = Release|x64
+		{63A1BF91-5390-40DF-B55D-34724A2AEEED}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{63A1BF91-5390-40DF-B55D-34724A2AEEED}.Debug|Any CPU.Build.0 = Debug|x64
+		{63A1BF91-5390-40DF-B55D-34724A2AEEED}.Debug|x64.ActiveCfg = Debug|x64
+		{63A1BF91-5390-40DF-B55D-34724A2AEEED}.Debug|x64.Build.0 = Debug|x64
+		{63A1BF91-5390-40DF-B55D-34724A2AEEED}.Release|Any CPU.ActiveCfg = Release|x64
+		{63A1BF91-5390-40DF-B55D-34724A2AEEED}.Release|Any CPU.Build.0 = Release|x64
+		{63A1BF91-5390-40DF-B55D-34724A2AEEED}.Release|x64.ActiveCfg = Release|x64
+		{63A1BF91-5390-40DF-B55D-34724A2AEEED}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -19,7 +19,7 @@ public sealed class ConfigNativeWindow : NativeAddon
     private const float TemplateNodeHeight = 185f;
     private readonly Configuration configuration;
     private readonly Plugin plugin;
-    private TagModal? tagModal;
+    private TagSearchAddon? tagSearchAddon;
 
     // Editable configuration fields
     private readonly List<Action> refreshPreviews = [];
@@ -44,7 +44,7 @@ public sealed class ConfigNativeWindow : NativeAddon
         SetWindowSize(540, 475);
 
         refreshPreviews.Clear();
-        tagModal = new TagModal();
+        tagSearchAddon = new TagSearchAddon();
 
         (previewPlayer, previewStatus) = ConfigUiSettings.GetPreviewContext(plugin);
 
@@ -181,13 +181,6 @@ public sealed class ConfigNativeWindow : NativeAddon
             },
         };
 
-        void InsertTag(TagDefinition tag)
-        {
-            draft += $"{{{tag.Tag}}}";
-            inputNode.String = draft;
-            RefreshPreview();
-        }
-
         return new HorizontalListNode // Body
         {
             Width = Size.X,
@@ -217,7 +210,7 @@ public sealed class ConfigNativeWindow : NativeAddon
                     Width = 28f,
                     Height = 28f,
                     TextTooltip = $"Insert a tag into {setting.Label}",
-                    OnClick = () => tagModal?.OpenFor(setting.Label, InsertTag)
+                    OnClick = () => tagSearchAddon?.OpenFor(setting.Label, InsertTags)
                 },
                 new TextButtonNode
                 {
@@ -242,6 +235,15 @@ public sealed class ConfigNativeWindow : NativeAddon
             ]
         };
 
+        void InsertTags(List<TagDefinition> tags)
+        {
+            if (tags.Count == 0) return;
+
+            draft += string.Join(" ", tags.Select(tag => $"{{{tag.Tag}}}"));
+            inputNode.String = draft;
+            RefreshPreview();
+        }
+
         void RefreshPreview()
         {
             var text = ParserService.Parse(draft, previewPlayer, previewStatus, configuration);
@@ -260,15 +262,15 @@ public sealed class ConfigNativeWindow : NativeAddon
 
     protected override unsafe void OnHide(AtkUnitBase* addon)
     {
-        tagModal?.CancelSelection();
+        tagSearchAddon?.CancelSelection();
         base.OnHide(addon);
     }
 
     protected override unsafe void OnFinalize(AtkUnitBase* addon)
     {
-        tagModal?.CancelSelection();
-        tagModal?.Dispose();
-        tagModal = null;
+        tagSearchAddon?.CancelSelection();
+        tagSearchAddon?.Dispose();
+        tagSearchAddon = null;
         refreshPreviews.Clear();
         base.OnFinalize(addon);
     }

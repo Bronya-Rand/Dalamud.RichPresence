@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/15.0.0">
     <PropertyGroup>
-        <Version>2.2.0.0</Version>
+        <Version>2.2.0.1</Version>
         <Author>Bronya Rand (formerly Franz, goat)</Author>
         <Company>Bronya Rand</Company>
         <Name>Discord Rich Presence</Name>
@@ -13,11 +13,11 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference GeneratePathProperty="true" Include="DiscordRichPresence" Version="1.6.1.70" />
+        <PackageReference GeneratePathProperty="true" Include="DiscordRichPresence" Version="1.6.1.70"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Content Remove="Resources/loc/*.json" />
+        <Content Remove="Resources/loc/*.json"/>
     </ItemGroup>
     <ItemGroup>
         <None Condition=" '$(Configuration)' == 'Debug' " Include="icon.png">
@@ -28,6 +28,7 @@
         </None>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\KamiToolKit\KamiToolKit.csproj" />
+        <ProjectReference Include="..\KamiToolKit\KamiToolKit.csproj"/>
+        <ProjectReference Include="..\KamiToolKit.Components\KamiToolKit.Components.csproj"/>
     </ItemGroup>
 </Project>

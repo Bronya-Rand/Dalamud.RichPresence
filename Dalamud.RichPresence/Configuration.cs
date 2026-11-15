@@ -69,6 +69,9 @@ public class Configuration : IPluginConfiguration
 
     private bool useNative;
 
+    /// <summary>
+    /// Whether to use Native UI over ImGui.
+    /// </summary>
     public bool UseNative
     {
         get => useNative;
@@ -80,6 +83,16 @@ public class Configuration : IPluginConfiguration
         }
     }
 
-    [field: NonSerialized] public event Action<bool>? OnUseNativeChanged;
+    /// <summary>
+    /// Determines whether the user has picked a UI to display RPC settings.
+    /// </summary>
+    public bool HasChosenConfigUi;
+
+    /// <summary>
+    /// Action when switching between Native UI and ImGui.
+    /// </summary>
+    [field: NonSerialized]
+    public event Action<bool>? OnUseNativeChanged;
+
     public void Save() => Plugin.PluginInterface.SavePluginConfig(this);
 }

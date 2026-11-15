@@ -26,7 +26,7 @@ public class TagSearchAddon : AbstractSearchAddon<TagDefinition, TagItemNode>
         windowTitle = $"Insert Tag into {fieldName}";
         if (IsOpen)
             Title = windowTitle;
-        
+
         ConfirmedSelections = insertTag;
         Open();
     }

@@ -40,6 +40,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     private readonly WindowSystem windowSystem = new("RichPresence");
     private ConfigWindow ConfigWindow { get; set; } = null!;
     private ConfigNativeWindow ConfigNativeWindow { get; set; } = null!;
+    private ChooseUiWindow ChooseUiWindow { get; set; } = null!;
     private LuminaService LuminaService { get; set; } = null!;
     internal DiscordService DiscordService { get; private set; } = null!;
     internal CollectContext CollectContext { get; private set; } = null!;
@@ -75,10 +76,14 @@ public sealed class Plugin : IAsyncDalamudPlugin
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        // Load / create config
         var config = PluginInterface.GetPluginConfig();
         Configuration = Migrate.TryMigrateFromLegacyConfig(config)
-                        ?? new Configuration { UseNative = true };
+                        ?? new Configuration();
+
+        // Default to Native if UI preference not selected
+        if (!Configuration.HasChosenConfigUi)
+            Configuration.UseNative = true;
+
         Configuration.OnUseNativeChanged += HandleUseNativeChanged;
 
         // Initialize services and managers
@@ -94,6 +99,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         // Setup KTK
         await KamiToolKitLibrary.InitializeAsync(PluginInterface, "Discord Rich Presence");
         ConfigNativeWindow = new ConfigNativeWindow(this);
+        ChooseUiWindow = new ChooseUiWindow(CompleteUiChoice);
 
         PluginInterface.UiBuilder.Draw += windowSystem.Draw;
         PluginInterface.UiBuilder.OpenConfigUi += ToggleConfigUi;
@@ -148,10 +154,43 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
     private void ToggleConfigUi()
     {
+        if (!Configuration.HasChosenConfigUi)
+        {
+            ChooseUiWindow.Open();
+            return;
+        }
+
         if (Configuration.UseNative)
             ConfigNativeWindow.Toggle();
         else
             ConfigWindow.Toggle();
+    }
+
+    private void CompleteUiChoice(bool useNative)
+    {
+        Configuration.OnUseNativeChanged -= HandleUseNativeChanged;
+
+        try
+        {
+            Configuration.UseNative = useNative;
+            Configuration.HasChosenConfigUi = true;
+            Configuration.Save();
+        }
+        finally
+        {
+            Configuration.OnUseNativeChanged += HandleUseNativeChanged;
+        }
+
+        ChooseUiWindow.Close();
+        OpenConfigUi();
+    }
+
+    private void OpenConfigUi()
+    {
+        if (Configuration.UseNative)
+            ConfigNativeWindow.Open();
+        else
+            ConfigWindow.IsOpen = true;
     }
 
     #region RPC Functions
@@ -166,12 +205,11 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
     private void UpdateStartTime(uint? newTerritoryId = null)
     {
-        if (Configuration.ResetTimeWhenChangingZones && newTerritoryId != null &&
-            (newTerritoryId != lastTerritoryId || lastTerritoryId == null))
-        {
-            lastTerritoryId = newTerritoryId.Value;
-            startTime = DateTime.UtcNow;
-        }
+        if (!Configuration.ResetTimeWhenChangingZones || newTerritoryId == null ||
+            (newTerritoryId == lastTerritoryId && lastTerritoryId != null)) return;
+
+        lastTerritoryId = newTerritoryId.Value;
+        startTime = DateTime.UtcNow;
     }
 
     private void UpdatePresence(IFramework framework)
@@ -185,11 +223,9 @@ public sealed class Plugin : IAsyncDalamudPlugin
             {
                 if (!Configuration.ShowLoginQueuePosition || !WaitingwayIpc.IsInLoginQueue())
                 {
-                    if (inQueue)
-                    {
-                        inQueue = false;
-                        SetDefaultPresence();
-                    }
+                    if (!inQueue) return;
+                    inQueue = false;
+                    SetDefaultPresence();
 
                     return;
                 }
@@ -223,20 +259,16 @@ public sealed class Plugin : IAsyncDalamudPlugin
 
             if (presence == null)
             {
-                if (lastPresence != null)
-                {
-                    DiscordService.ClearPresence();
-                    lastPresence = null;
-                }
+                if (lastPresence == null) return;
+                DiscordService.ClearPresence();
+                lastPresence = null;
 
                 return;
             }
 
-            if (!PresenceEquals(presence, lastPresence))
-            {
-                DiscordService.SetPresence(presence);
-                lastPresence = presence;
-            }
+            if (PresenceEquals(presence, lastPresence)) return;
+            DiscordService.SetPresence(presence);
+            lastPresence = presence;
         }
         catch (Exception ex)
         {
@@ -299,11 +331,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
         Framework.Run(() =>
         {
             CloseAllUi();
-
-            if (useNative)
-                ConfigNativeWindow.Open();
-            else
-                ConfigWindow.IsOpen = true;
+            OpenConfigUi();
         });
     }
 }

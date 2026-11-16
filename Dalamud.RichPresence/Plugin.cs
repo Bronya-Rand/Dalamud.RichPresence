@@ -24,7 +24,7 @@ public sealed class Plugin : IAsyncDalamudPlugin
     [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] internal static IClientState ClientState { get; private set; } = null!;
     [PluginService] private static ICommandManager CommandManager { get; set; } = null!;
-    [PluginService] private static IDataManager DataManager { get; set; } = null!;
+    [PluginService] internal static IDataManager DataManager { get; set; } = null!;
     [PluginService] private static IFramework Framework { get; set; } = null!;
     [PluginService] internal static IPartyList PartyList { get; private set; } = null!;
     [PluginService] internal static IPluginLog Log { get; private set; } = null!;
@@ -41,7 +41,6 @@ public sealed class Plugin : IAsyncDalamudPlugin
     private ConfigWindow ConfigWindow { get; set; } = null!;
     private ConfigNativeWindow ConfigNativeWindow { get; set; } = null!;
     private ChooseUiWindow ChooseUiWindow { get; set; } = null!;
-    private LuminaService LuminaService { get; set; } = null!;
     internal DiscordService DiscordService { get; private set; } = null!;
     internal CollectContext CollectContext { get; private set; } = null!;
     internal static LocalizationService LocalizationService { get; private set; } = null!;
@@ -87,7 +86,6 @@ public sealed class Plugin : IAsyncDalamudPlugin
         Configuration.OnUseNativeChanged += HandleUseNativeChanged;
 
         // Initialize services and managers
-        LuminaService = new LuminaService(DataManager);
         LocalizationService = new LocalizationService();
         WaitingwayIpc = new WaitingwayIpc();
         DiscordService = new DiscordService(Configuration);
@@ -311,7 +309,6 @@ public sealed class Plugin : IAsyncDalamudPlugin
         await ConfigNativeWindow.DisposeAsync();
 
         LocalizationService.Dispose();
-        LuminaService.Dispose();
         DiscordService.Dispose();
         await KamiToolKitLibrary.DisposeAsync();
     }

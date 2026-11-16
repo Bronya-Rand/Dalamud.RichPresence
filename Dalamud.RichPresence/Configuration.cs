@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 using Dalamud.Configuration;
 
 namespace Dalamud.RichPresence;
@@ -91,7 +92,7 @@ public class Configuration : IPluginConfiguration
     /// <summary>
     /// Action when switching between Native UI and ImGui.
     /// </summary>
-    [field: NonSerialized]
+    [field: JsonIgnore]
     public event Action<bool>? OnUseNativeChanged;
 
     public void Save() => Plugin.PluginInterface.SavePluginConfig(this);

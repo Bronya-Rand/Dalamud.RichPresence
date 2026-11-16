@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.RichPresence.Services;
 using Dalamud.Utility;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
@@ -133,7 +132,7 @@ namespace Dalamud.RichPresence.Helpers
             if (!configuration.ShowPartyData) return new PartyContext(false, false, false, -1, -1, string.Empty);
             if (Plugin.PartyList.Length > 0 && Plugin.PartyList.PartyId != 0)
             {
-                var contentFinderConditionTerritory = LuminaService.Instance.GetContentFinderConditionOfClient();
+                var contentFinderConditionTerritory = LuminaHelper.GetContentFinderConditionOfClient();
 
                 var maxPartySize = contentFinderConditionTerritory is { ContentType.RowId: 2 } ? 4 : 8;
                 if (Plugin.PartyList.Length > maxPartySize)
@@ -197,7 +196,7 @@ namespace Dalamud.RichPresence.Helpers
             var housingManager = HousingManager.Instance();
             if (housingManager != null && housingManager->IsInside())
                 territoryId =
-                    LuminaService.Instance.GetOriginalTerritoryId(HousingManager.GetOriginalHouseTerritoryTypeId());
+                    LuminaHelper.GetOriginalTerritoryId(HousingManager.GetOriginalHouseTerritoryTypeId());
 
             var wardId = housingManager->GetCurrentWard();
             var territoryName = string.Empty;
@@ -205,7 +204,7 @@ namespace Dalamud.RichPresence.Helpers
 
             if (territoryId != 0)
             {
-                var territory = LuminaService.Instance.GetTerritoryType(territoryId);
+                var territory = LuminaHelper.GetTerritoryType(territoryId);
                 if (territory != null)
                 {
                     territoryName = territory.Value.PlaceName.Value.Name.ToString();
@@ -222,7 +221,7 @@ namespace Dalamud.RichPresence.Helpers
             var currentWorld = localPlayer.CurrentWorld.Value.Name.ToString();
             var homeWorldId = localPlayer.HomeWorld.RowId;
             var homeWorld = localPlayer.HomeWorld.Value.Name.ToString();
-            var dcName = LuminaService.Instance.GetLogicalDcTerritoryName(localPlayer.CurrentWorld.Value.Unknown0)
+            var dcName = LuminaHelper.GetLogicalDcTerritoryName(localPlayer.CurrentWorld.Value.Unknown0)
                 .ToString();
             var classJob = localPlayer.ClassJob.Value.Name.ToString();
             var textInfo = CultureInfo.CurrentCulture.TextInfo;

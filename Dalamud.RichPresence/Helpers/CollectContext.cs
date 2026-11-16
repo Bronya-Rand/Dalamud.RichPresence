@@ -118,7 +118,7 @@ namespace Dalamud.RichPresence.Helpers
                                        || Plugin.Condition[ConditionFlag.WatchingCutscene78];
 
                 var onlineStatusRowId = localPlayer.OnlineStatus.Value.RowId;
-                var onlineStatusStr = localPlayer.OnlineStatus.Value.Name.ExtractText();
+                var onlineStatusStr = localPlayer.OnlineStatus.Value.Name.ToString();
 
                 return new OnlineStatusContext(
                     IsAfk: onlineStatusRowId == 17, // Row 17 has the AFK status in the game
@@ -208,7 +208,7 @@ namespace Dalamud.RichPresence.Helpers
                 var territory = LuminaService.Instance.GetTerritoryType(territoryId);
                 if (territory != null)
                 {
-                    territoryName = territory.Value.PlaceName.Value.Name.ExtractText();
+                    territoryName = territory.Value.PlaceName.Value.Name.ToString();
                     territoryLoadingImageId = territory.Value.LoadingImage.RowId;
                 }
                 else
@@ -219,12 +219,12 @@ namespace Dalamud.RichPresence.Helpers
             var instanceId = uiState->PublicInstance.InstanceId;
 
             var currentWorldId = localPlayer.CurrentWorld.RowId;
-            var currentWorld = localPlayer.CurrentWorld.Value.Name.ExtractText();
+            var currentWorld = localPlayer.CurrentWorld.Value.Name.ToString();
             var homeWorldId = localPlayer.HomeWorld.RowId;
-            var homeWorld = localPlayer.HomeWorld.Value.Name.ExtractText();
+            var homeWorld = localPlayer.HomeWorld.Value.Name.ToString();
             var dcName = LuminaService.Instance.GetLogicalDcTerritoryName(localPlayer.CurrentWorld.Value.Unknown0)
-                .ExtractText();
-            var classJob = localPlayer.ClassJob.Value.Name.ExtractText();
+                .ToString();
+            var classJob = localPlayer.ClassJob.Value.Name.ToString();
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
 
             return new PlayerContext(
@@ -242,7 +242,7 @@ namespace Dalamud.RichPresence.Helpers
                 InstanceId: instanceId,
                 ClassJobId: localPlayer.ClassJob.RowId,
                 ClassJob: textInfo.ToTitleCase(classJob),
-                ClassJobAbbreviation: localPlayer.ClassJob.Value.Abbreviation.ExtractText(),
+                ClassJobAbbreviation: localPlayer.ClassJob.Value.Abbreviation.ToString(),
                 Level: localPlayer.Level
             );
         }

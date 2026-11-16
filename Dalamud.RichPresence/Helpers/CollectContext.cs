@@ -222,7 +222,8 @@ namespace Dalamud.RichPresence.Helpers
             var currentWorld = localPlayer.CurrentWorld.Value.Name.ExtractText();
             var homeWorldId = localPlayer.HomeWorld.RowId;
             var homeWorld = localPlayer.HomeWorld.Value.Name.ExtractText();
-            var dcName = localPlayer.CurrentWorld.Value.DataCenter.Value.Name.ExtractText();
+            var dcName = LuminaService.Instance.GetLogicalDcTerritoryName(localPlayer.CurrentWorld.Value.Unknown0)
+                .ExtractText();
             var classJob = localPlayer.ClassJob.Value.Name.ExtractText();
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
 

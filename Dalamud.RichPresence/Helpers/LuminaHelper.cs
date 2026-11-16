@@ -23,7 +23,7 @@ namespace Dalamud.RichPresence.Helpers
         // TODO: Use CurrentWorld for this once added
         public static ReadOnlySeString GetLogicalDcTerritoryName(byte logicalDataCenterByte)
         {
-            var sheet = Plugin.DataManager.GetExcelSheet<TerritoryType>();
+            var sheet = Plugin.DataManager.GetExcelSheet<WorldDCGroupType>();
             return sheet.GetRow(logicalDataCenterByte).Name;
         }
 
